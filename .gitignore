@@ -1,0 +1,36 @@
+# arquivos de build
+*.apk
+*.ap_
+
+# arquivos para dex VM
+*.dex
+
+# classes de java
+*.class
+
+# arquivos gerados
+bin/
+gen/
+
+# propriedades locais
+local.properties
+
+# thumbnail do windows
+Thumbs.db
+
+# OSX files
+.DS_Store
+
+# coisas de android studio
+*.iml
+.idea
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
+build/
+.navigation
+captures/
+output.json 
+
+#NDK
+obj/
+.externalNativeBuild
