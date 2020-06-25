@@ -55,6 +55,11 @@ PATH = %PATH%;C:\Users\User\AppData\Local\Android\Sdk\tools\bin
 
 ## Desenvolvendo
 
+Desenvolver para android é saber da interação java com xml.
+
+Os arquivos XML do projeto definem o fron end das telas e estão armazenadas em /res/layout.
+
+Os arquivos de lógica, isto é, java estão em /java
 
 ## Buildando
 
