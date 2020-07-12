@@ -119,4 +119,22 @@ adb é abstração que interage com o emulador.
 
 Ao final, é só navegar pelo seu emulador que você vai achar ele.
 
+### Testando em um aparelho Android
 
+Conecte o seu dispositivo android à entrada usb do seu computador.
+
+Certifique-se de que o modo de desenvolvedor já está habilitado em seu celular.
+
+Execute o comando:
+
+``` adb devices ```
+
+Para verificar se o seu dispositivo consta. Irá requisitar uma permissão no seu celular. Após isso, o label que deve aparecer ao seu lado é 'device'.
+
+Em seguida, instale o .apk que se encontra na pasta build outputs nele com o comando:
+
+``` adb -s <id do device> install ./app/build/outputs/apk/debug/<path do apk>.apk ```
+
+Use a flag -r para reinstalações.
+
+Caso o seu dispositivo android seja o unico adb conectado, não se preocupe em colocar a flag -s id.
