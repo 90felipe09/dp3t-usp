@@ -1,0 +1,90 @@
+{  
+    "config": {
+        "lora-radio": {
+            "help": "Which radio to use (options: SX126X, SX1272, SX1276) -- See config/ dir for example configs",
+            "value": "SX1272"
+        },
+        "main_stack_size":     { "value": 4096 },
+
+        "lora-spi-mosi":       { "value": "NC" },
+        "lora-spi-miso":       { "value": "NC" },
+        "lora-spi-sclk":       { "value": "NC" },
+        "lora-cs":             { "value": "NC" },
+        "lora-reset":          { "value": "NC" },
+        "lora-dio0":           { "value": "NC" },
+        "lora-dio1":           { "value": "NC" },
+        "lora-dio2":           { "value": "NC" },
+        "lora-dio3":           { "value": "NC" },
+        "lora-dio4":           { "value": "NC" },
+        "lora-dio5":           { "value": "NC" },
+        "lora-rf-switch-ctl1": { "value": "NC" },
+        "lora-rf-switch-ctl2": { "value": "NC" },
+        "lora-txctl":          { "value": "NC" },
+        "lora-rxctl":          { "value": "NC" },
+        "lora-ant-switch":     { "value": "NC" },
+        "lora-pwr-amp-ctl":    { "value": "NC" },
+        "lora-tcxo":           { "value": "NC" }
+    },
+    
+    "target_overrides": {
+        "*": {
+            "platform.stdio-convert-newlines": true,
+            "platform.stdio-baud-rate": 9600,
+            "platform.default-serial-baud-rate": 9600,
+            "lora.over-the-air-activation": false,
+            "lora.duty-cycle-on": true,
+            "lora.phy": "AU915",
+            "lora.device-eui": "{0x2f, 0xc6, 0xaa, 0xf2, 0x8b, 0x61, 0x4f, 0x8a}",
+            "lora.application-eui": "{0x65, 0x48, 0x59, 0x64, 0x52, 0xd4, 0xc5, 0xd5}", 
+            "lora.application-key": "{0xa8, 0xdc, 0xc6, 0x31, 0x35, 0x38, 0x90, 0xf7, 0x0b, 0x5c, 0x5e, 0xf6, 0x5a, 0x87, 0x9c, 0xd0}",
+            "lora.appskey": "{0x8e, 0x28, 0xac, 0x67, 0x5b, 0xfe, 0x1c, 0xea, 0x4c, 0x2a, 0xeb, 0x15, 0x87, 0x22, 0xe6, 0x6a}",
+            "lora.nwkskey": "{0xaa, 0x68, 0xae, 0x6e, 0x14, 0x65, 0x3a, 0xa5, 0x18, 0x38, 0x00, 0x42, 0xe3, 0x17, 0xd4, 0x8e}",
+            "lora.device-address": "0xc03b0ff0"
+        },
+        "K64F": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"]
+        },
+        "NUCLEO_F401RE": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"]
+        },
+        "DISCO_L475VG_IOT01A": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"]
+        },
+        "NRF52840_DK": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_LL", "SOFTDEVICE_N ONE", "NORDIC_CORDIO"],
+            "target.extra_labels_remove": ["SOFTDEVICE_COMMON", "SOFTDEVICE_S140_FULL", "NORDIC_SOFTDEVICE"],           
+            "target.lf_clock_src": "NRF_LF_SRC_RC",
+            "target.lf_clock_rc_calib_timer_interval": 16,
+            "target.lf_clock_rc_calib_mode_config": 2,
+            "target.macros_add":   ["NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=4"],
+            "lora-spi-mosi":       "P0_4",
+            "lora-spi-miso":       "P0_6",
+            "lora-spi-sclk":       "P0_8",
+            "lora-cs":             "P0_26",
+            "lora-reset":          "P1_15",
+            "lora-dio0":           "P0_12",
+            "lora-dio1":           "P0_14",
+            "lora-dio2":           "P1_8",
+            "lora-dio3":           "P1_9",
+            "lora-dio4":           "NC",
+            "lora-dio5":           "NC",
+            "lora-rf-switch-ctl1": "NC",
+            "lora-rf-switch-ctl2": "NC",
+            "lora-txctl":          "NC",
+            "lora-rxctl":          "NC",
+            "lora-ant-switch":     "NC",
+            "lora-pwr-amp-ctl":    "NC",
+            "lora-tcxo":           "NC"
+            
+        },
+        "NRF52_DK": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_LL", "SOFTDEVICE_NONE", "NORDIC_CORDIO"],
+            "target.extra_labels_remove": ["SOFTDEVICE_COMMON", "SOFTDEVICE_S132_FULL", "NORDIC_SOFTDEVICE"]
+        }
+    }
+}

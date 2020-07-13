@@ -1,0 +1,260 @@
+
+/* defines the axis for acc */
+#define ACC_NOOF_AXIS       3
+#define GYR_NOOF_AXIS       3
+#define MAG_NOOF_AXIS       3
+ 
+/* bmi160 slave address */
+#define BMI160_ADDR         ((0x69)<<1)
+ 
+#define RAD_DEG           57.29577951
+
+I2C i2c(p13, p15);
+
+
+int16_t acc_sample_buffer[ACC_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+int16_t gyr_sample_buffer[GYR_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+int16_t mag_sample_buffer[MAG_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+
+double acc_result_buffer[ACC_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+double gyr_result_buffer[GYR_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+double mag_result_buffer[MAG_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+
+double acc_previous_result_buffer[ACC_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+double delta_acc_result_buffer[ACC_NOOF_AXIS] = {0x5555, 0x5555, 0x5555};
+double coord_result_buffer[ACC_NOOF_AXIS] = {0x0000, 0x0000};
+
+
+double accel_ang_x, accel_ang_y;
+double tiltx, tilty;
+double tiltx_prev, tilty_prev;
+ 
+char i2c_reg_buffer[2] = {0};
+
+
+void BMX160_config(void){
+     
+     i2c.frequency(20000);
+    
+        /*Reset BMI160*/
+        i2c_reg_buffer[0] = 0x7E;
+        i2c_reg_buffer[1] = 0xB6;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        wait_ms(200);
+        printf("BMI160 Resetado\n\r");
+    
+        /*Habilita o Acelerometro*/
+        i2c_reg_buffer[0] = 0x7E;
+        i2c_reg_buffer[1] = 0x11; //PMU Normal   
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Acc Habilitado\n\r");
+    
+        /*Habilita o Giroscopio*/
+        i2c_reg_buffer[0] = 0x7E;
+        i2c_reg_buffer[1] = 0x15;  //PMU Normal 
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Gyr Habilitado\n\r");
+            
+        /*Config o Data Rate ACC em 1600Hz*/
+        i2c_reg_buffer[0] = 0x40;
+        i2c_reg_buffer[1] = 0x2C;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Data Rate ACC Selecionado a 1600Hz\n\r");
+    
+        /*Config o Data Rate GYR em 1600Hz*/
+        i2c_reg_buffer[0] = 0x42;
+        i2c_reg_buffer[1] = 0x2C;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Data Rate GYR Selecionado a 1600Hz\n\r");
+        
+        /*Config o Range ACC em 2G*/
+        i2c_reg_buffer[0] = 0x41;
+        i2c_reg_buffer[1] = 0x03;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Range GYR Selecionado a 250deg/s\n\r"); 
+        
+        /*Config o Range GYR em 250º/s*/
+        i2c_reg_buffer[0] = 0x43;
+        i2c_reg_buffer[1] = 0x03;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        printf("Range GYR Selecionado a 250deg/s\n\r"); 
+        
+        /*Habilita o Magnetometro*/
+        i2c_reg_buffer[0] = 0x7E;
+        i2c_reg_buffer[1] = 0x19;  //PMU Normal 
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        wait_ms (800);
+        printf("Mag Habilitado\n\r");
+        
+        /*Config o Magnetometro*/
+        i2c_reg_buffer[0] = 0x4C;
+        i2c_reg_buffer[1] = 0x80;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+        wait_ms (50);
+        
+        i2c_reg_buffer[0] = 0x4F;
+        i2c_reg_buffer[1] = 0x01;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+    
+        i2c_reg_buffer[0] = 0x4E;
+        i2c_reg_buffer[1] = 0x4B;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+
+        i2c_reg_buffer[0] = 0x4F;
+        i2c_reg_buffer[1] = 0x04;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+    
+        i2c_reg_buffer[0] = 0x4E;
+        i2c_reg_buffer[1] = 0x51;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+ 
+        i2c_reg_buffer[0] = 0x4F;
+        i2c_reg_buffer[1] = 0x0E;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+    
+        i2c_reg_buffer[0] = 0x4E;
+        i2c_reg_buffer[1] = 0x52;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+ 
+        i2c_reg_buffer[0] = 0x4F;
+        i2c_reg_buffer[1] = 0x02;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+    
+        i2c_reg_buffer[0] = 0x4E;
+        i2c_reg_buffer[1] = 0x4C;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+ 
+        i2c_reg_buffer[0] = 0x4D;
+        i2c_reg_buffer[1] = 0x42;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+
+        i2c_reg_buffer[0] = 0x44;
+        i2c_reg_buffer[1] = 0x08;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+     
+        i2c_reg_buffer[0] = 0x4C;
+        i2c_reg_buffer[1] = 0x03;    
+        i2c.write(BMI160_ADDR, i2c_reg_buffer, sizeof(i2c_reg_buffer), false);
+ 
+        wait_ms(50);
+ 
+        
+    
+        wait(0.1);
+        
+        printf("BMI160 Configurado\n\r");
+    }
+    
+    
+   void  BMX160_read_acc(void){
+                
+            i2c.frequency(20000);
+      
+            /*Le os Registradores do Acelerometro*/
+            i2c_reg_buffer[0] = 0x12;
+            i2c.write(BMI160_ADDR, i2c_reg_buffer, 1, true);
+            i2c.read(BMI160_ADDR, (char *)&acc_sample_buffer, sizeof(acc_sample_buffer), false);
+            
+            /*Ajusta dados brutos Acelerometro em unidades de g */
+            
+            acc_result_buffer[0] = (acc_sample_buffer[0]);
+            acc_result_buffer[1] = (acc_sample_buffer[1]);
+            acc_result_buffer[2] = (acc_sample_buffer[2]);
+            
+            printf("Acc results: %f mG, %f mG, %f mG \n",acc_result_buffer[0], acc_result_buffer[1], acc_result_buffer[2]); 
+            
+            wait(0.5);            
+    
+            if (comm==1){
+                 sens00 = acc_result_buffer[0]*100 + 255/2;
+                 sens00 = (sens00 < 0 ? 0 : sens00); 
+                 sens00 = (sens00 > 255 ? 255 : sens00);
+                 printf("Acc Result (X axis) = %u\n", sens00);
+                 
+                 sens01 = acc_result_buffer[1]*100 + 255/2;
+                 sens01 = (sens01 < 0 ? 0 : sens01); 
+                 sens01 = (sens01 > 255 ? 255 : sens01);
+                 printf("Acc Result (Y axis) = %u\n", sens01);
+                 
+                 sens02 = acc_result_buffer[2]*100 + 255/2;
+                 sens02 = (sens02 < 0 ? 0 : sens02); 
+                 sens02 = (sens02 > 255 ? 255 : sens02);
+                 printf("Acc Result (Z axis) = %u\n", sens02);
+                 
+                 }
+    
+        }
+    
+    void BMX160_read_gyr (void){
+            
+                        i2c.frequency(20000);
+                         
+            /*Le os Registradores do Giroscopio*/
+            i2c_reg_buffer[0] = 0x0C;
+            i2c.write(BMI160_ADDR, i2c_reg_buffer, 1, true);
+            i2c.read(BMI160_ADDR, (char *)&gyr_sample_buffer, sizeof(gyr_sample_buffer), false);
+        
+            /*Ajusta dados Brutos do Giroscopio em unidades de deg/s */
+            gyr_result_buffer[0] = (gyr_sample_buffer[0]); // /131.2
+            gyr_result_buffer[1] = (gyr_sample_buffer[1]);
+            gyr_result_buffer[2] = (gyr_sample_buffer[2]);
+            printf("Gyr results: %f, %f, %f \n", gyr_result_buffer[0], gyr_result_buffer[1], gyr_result_buffer[2]);
+            wait(0.5);
+            
+            if (comm==1){
+                 sens00 = gyr_result_buffer[0]*100 + 255/2;
+                 sens00 = (sens00 < 0 ? 0 : sens00); 
+                 sens00 = (sens00 > 255 ? 255 : sens00);
+                 printf("Gyr Result (X axis) = %u\n", sens00);
+                 
+                 sens01 = gyr_result_buffer[1]*100 + 255/2;
+                 sens01 = (sens01 < 0 ? 0 : sens01); 
+                 sens01 = (sens01 > 255 ? 255 : sens01);
+                 printf("Gyr Result (Y axis) = %u\n", sens01);
+                 
+                 sens02 = gyr_result_buffer[2]*100 + 255/2;
+                 sens02 = (sens02 < 0 ? 0 : sens02); 
+                 sens02 = (sens02 > 255 ? 255 : sens02);
+                 printf("Gyr Result (Z axis) = %u\n", sens02);
+                 
+                 }
+            
+        }
+        
+        void  BMX160_read_mag(void){
+                
+            i2c.frequency(20000);
+      
+            /*Le os Registradores do Magnetometro*/
+            i2c_reg_buffer[0] = 0x04;
+            i2c.write(BMI160_ADDR, i2c_reg_buffer, 1, true);
+            i2c.read(BMI160_ADDR, (char *)&mag_sample_buffer, sizeof(mag_sample_buffer), false);
+            
+            /*Ajusta dados brutos Acelerometro em unidades de uT*/
+            mag_result_buffer[0] = (mag_sample_buffer[0]);
+            mag_result_buffer[1] = (mag_sample_buffer[1]);
+            mag_result_buffer[2] = (mag_sample_buffer[2]);
+        
+            printf("Mag results: %f, %f, %f \n",mag_result_buffer[0], mag_result_buffer[1], mag_result_buffer[2]); 
+            wait(0.5);
+            
+            if (comm==1){
+                 sens00 = mag_result_buffer[0];
+                 sens00 = (sens00 < 0 ? 0 : sens00); 
+                 sens00 = (sens00 > 255 ? 255 : sens00);
+                 printf("Mag Result (X axis) = %u\n", sens00);
+                 
+                 sens01 = mag_result_buffer[1];
+                 sens01 = (sens01 < 0 ? 0 : sens01); 
+                 sens01 = (sens01 > 255 ? 255 : sens01);
+                 printf("Mag Result (Y axis) = %u\n", sens01);
+                 
+                 sens02 = mag_result_buffer[2];
+                 sens02 = (sens02 < 0 ? 0 : sens02); 
+                 sens02 = (sens02 > 255 ? 255 : sens02);
+                 printf("Mag Result (Z axis) = %u\n", sens02);
+                 
+                 }    
+    
+        }
+         

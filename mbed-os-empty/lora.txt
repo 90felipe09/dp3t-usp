@@ -1,0 +1,224 @@
+#include "SX1272.h"
+
+//#define BAND868
+#define MAX_DBM 14
+#define DATA 0
+#define PING 1
+#define PONG 2
+
+
+#define ADDRESS 10
+
+const uint32_t DEFAULT_CHANNEL=CH_12_900;//915Mhz CH_12_900 =>0xE4C000;
+
+///////////////////////////////////////////////////////////////////
+// CHANGE HERE THE LORA MODE, NODE ADDRESS
+#define LORAMODE  1
+#define node_addr 6
+//////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+// CHANGE HERE THE THINGSPEAK FIELD BETWEEN 1 AND 4
+#define field_index 1
+///////////////////////////////////////////////////////////////////
+#define DEFAULT_DEST_ADDR 6
+
+
+///////////////////////////////////////
+// Globals variables
+///////////////////////////////////////
+
+//___________SX1272____________________
+int e;
+
+//___________mensagem_____________________
+uint8_t message[255];
+uint8_t buffer[255];
+uint8_t message_pong[]="Pong";
+uint8_t message_ping[]="Ping";
+uint8_t r_size;
+char float_temp[10];
+char float_press[10];
+char float_hum[10];
+int cont =0;
+int loraMode=LORAMODE;
+
+
+////////////////////////////////////////
+// SETUP SX1272 initialisation
+////////////////////////////////////////
+void setup()
+{
+    //____Configuration Lora    
+    Thread eventThread;
+    eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
+
+    printf("------Coragem LoRa-------------\n");
+    //sx1272.ON();  // Power ON the module
+
+    int error_config_sx1272=0;
+
+    // Set transmission mode and print the result
+    e = sx1272.setMode(loraMode);
+    printf("Mode: %d\n",loraMode);
+    if (e) error_config_sx1272=1;
+    printf("Setting Mode: state %d\n",e);
+
+    // enable carrier sense
+    sx1272._enableCarrierSense=true;
+
+    // for LOW POWER
+    sx1272._RSSIonSend=false;
+
+
+    // Select frequency channel
+    e = sx1272.setChannel(DEFAULT_CHANNEL);
+    if (e) error_config_sx1272=1;
+    printf("Setting Channel: state %d\n",e);
+
+    // Select amplifier line; PABOOST or RFO
+//    #ifdef PABOOST
+//        printf("pabboost\n");
+//        sx1272._needPABOOST=true;
+//    // previous way for setting output power
+//    // powerLevel='x';
+//    #else
+//    // previous way for setting output power
+//    // powerLevel='M';
+//    #endif
+
+    // previous way for setting output power
+    // e = sx1272.setPower(powerLevel);
+
+    e = sx1272.setPowerDBM((uint8_t)MAX_DBM);
+    if (e) error_config_sx1272=1;
+    printf("Setting Power: state %d\n",e);
+
+    // Set the node address and print the result
+    e = sx1272.setNodeAddress(node_addr);
+    if (e) error_config_sx1272=1;
+    printf("Setting node addr: state %d\n",e);
+
+    // Print a success message
+    if (!error_config_sx1272) printf("SX1272 successfully configured\n");
+    else printf("ERROR CONFIGURATION SX1272\n");
+
+    wait_ms(400);
+}
+void send_packet (uint8_t *payload, uint8_t length8)   // envia pacote
+{
+
+    //write on FIFO
+    sx1272.writeRegister(REG_IRQ_FLAGS,255);//clear flags
+    sx1272.writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);  // Stdby LoRa mode to write in FIFO
+    sx1272.writeRegister(REG_PAYLOAD_LENGTH_LORA, length8);
+    sx1272.writeRegister(REG_FIFO_TX_BASE_ADDR,0x00);
+    sx1272.writeRegister(REG_FIFO_ADDR_PTR,0x00);
+
+    for(unsigned int i = 0; i <= length8; i++) {
+        sx1272.writeRegister(REG_FIFO, payload[i]);  // Writing the payload in FIFO
+    }
+
+    //________________Send Data__________________
+    sx1272.writeRegister(REG_IRQ_FLAGS,255);//clear flags
+    sx1272.writeRegister(REG_OP_MODE, LORA_TX_MODE);  // LORA mode - Tx
+
+    unsigned long exitTime = millis()+2000;//2 segundos para sair do for
+    unsigned long Time= millis();
+    char value = sx1272.readRegister(REG_IRQ_FLAGS);
+
+    while ((bitRead(value, 3) == 0) && (Time < exitTime)) {
+        value=sx1272.readRegister(REG_IRQ_FLAGS);
+        Time= millis();
+        wait_ms(50);
+    }
+
+    wait_ms(50);
+
+}
+
+void send_data(int mode)  //data predefined
+{
+    led1=1;
+    sx1272.writeRegister(REG_OP_MODE,129);//standby
+
+    if (mode == DATA ) {
+
+        sprintf(float_temp,"%2.2f",1);
+
+
+
+        //size=sprintf((char*)message,"\\!#%s°C_%shPa_%s%%",float_temp,float_temp,float_temp);
+
+        send_packet(message,r_size);
+//        sx1272.sendPacketTimeout(DEFAULT_DEST_ADDR,/* (uint8_t*)*/message, r_size);
+        printf("packet send :\n%s\nrsize=%d\n",message,r_size);
+
+    } else if (mode == PING ) {
+
+
+        //sx1272.sendPacketTimeout(DEFAULT_DEST_ADDR, message_ping, sizeof(message_ping));
+        send_packet(message_ping,sizeof(message_ping));
+        printf("packet send :\n%s\n",message_ping);
+
+
+    } else if (mode == PONG )  {
+
+        //sx1272.sendPacketTimeout(DEFAULT_DEST_ADDR, message_pong, sizeof(message_pong));
+        send_packet(message_pong,sizeof(message_pong));
+        printf("packet send :\n%s\n",message_pong);
+    }
+
+    wait_ms(300);
+
+    sx1272.writeRegister(REG_IRQ_FLAGS,255);//clear flags
+    sx1272.writeRegister(REG_OP_MODE,133); //leitura continua
+    cont++;
+    printf("number=%d\n",cont);
+
+    led1=0;
+}
+
+
+void print_packet()
+{
+
+    led2=1;
+    sx1272.writeRegister(REG_OP_MODE,129);//standby
+
+    uint8_t pac_size;
+
+    sx1272.writeRegister(REG_FIFO_ADDR_PTR,sx1272.readRegister(REG_FIFO_RX_CURRENT_ADDR));//set fifo pointer to read packet
+    pac_size = sx1272.readRegister(REG_RX_NB_BYTES);//read size of packet
+    for(int i =0 ; i<pac_size ; i++) { //print packet
+        buffer[i]=sx1272.readRegister(REG_FIFO);
+      /*  if (buffer[i]== '\n')  printf(" \\n");
+        if (buffer[i]== 0x0B)  printf("tab");*/
+        printf("%c",buffer[i]);//print packet
+    }
+    printf("\n");
+
+
+    for(int i =0 ; i<pac_size ; i++) { //look for Ping in packet
+        if ((buffer[i] =='P') && (buffer[i+1] =='i') && (buffer[i+2] =='n') && (buffer[i+3] =='g') ) {
+            sx1272.writeRegister(0x12,255);//clear flags
+            send_data(PONG);
+            i=pac_size;
+        }
+    }
+
+    for(int i =0 ; i<pac_size ; i++) { //look for Reset in packet
+        if ((buffer[i] =='R') && (buffer[i+1] =='e') && (buffer[i+2] =='s') && (buffer[i+3] =='e') && (buffer[i+4] =='t')  ) {
+            uint32_t *ptr;
+            ptr = (uint32_t *)1073743132;// endereço gpregret 0x4000051C
+            *ptr = 0xB1;//BOOTLOADER_DFU_START
+            NVIC_SystemReset();
+        }
+    }
+
+    wait_ms(30);
+    sx1272.writeRegister(REG_IRQ_FLAGS,255);//clear flags
+    sx1272.writeRegister(REG_OP_MODE,133); //leitura continua
+    led2=0;
+
+}
