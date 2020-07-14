@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DP3T-USP</string>
     <string name="ble_uuid_dp3t">03d95df9-63c9-494d-a8b0-d86f2bdc06c3</string>
+    <string name="advertising_notif">O DP3T está em modo de captura</string>
 </resources>
