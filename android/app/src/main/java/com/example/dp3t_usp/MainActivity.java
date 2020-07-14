@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // Background service
     private Intent backgroundServiceIntent;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initializeBLE(){
         this.pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid_dp3t)));
         this.advertiser = new BLEAdvertiserHandler(this.pUuid,"");
-        this.scanner = new BLEScannerHandler(this.pUuid);
+        this.scanner = new BLEScannerHandler(this.pUuid, this);
         this.backgroundServiceIntent = new Intent(this, BLEService.class);
         this.handler = new Handler();
 

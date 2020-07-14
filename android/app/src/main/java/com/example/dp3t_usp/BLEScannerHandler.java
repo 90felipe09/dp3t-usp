@@ -1,16 +1,21 @@
 package com.example.dp3t_usp;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class BLEScannerHandler {
@@ -21,12 +26,17 @@ public class BLEScannerHandler {
     private ScanFilter filter;
     private ScanSettings scanSettings;
 
+    private Context context;
+
+    private ListenedHashesHelper dbListenedHelper;
 
     // Public domain
-    public BLEScannerHandler(ParcelUuid pUuid){
+    public BLEScannerHandler(ParcelUuid pUuid, Context context){
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         configScanner();
         setFilters(pUuid);
+        this.context = context;
+        this.dbListenedHelper = new ListenedHashesHelper(context);
     }
 
     public void startScanning(){
@@ -52,6 +62,17 @@ public class BLEScannerHandler {
         filters.add(filter);
     }
 
+    // Add a hash to the ListenedHashes table
+    private void writeHashToDB(String hash){
+        SQLiteDatabase db = dbListenedHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH, hash);
+        values.put(ListenedHashesContract.ListenedHashEntry.COLUMN_DATE, new Date().toString());
+
+        db.insert(ListenedHashesContract.ListenedHashEntry.TABLE_NAME, null, values);
+    }
+
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result){
@@ -65,6 +86,7 @@ public class BLEScannerHandler {
                                     .getServiceUuids()
                                     .get(0)), Charset.forName("UTF-8")));
 
+            writeHashToDB(builder.toString());
         }
 
         @Override
