@@ -3,6 +3,8 @@ package com.example.dp3t_usp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -38,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private BLEScannerHandler scanner;
     private ParcelUuid pUuid;
 
+    // Background service
+    private Intent backgroundServiceIntent;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         this.pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid_dp3t)));
         this.advertiser = new BLEAdvertiserHandler(this.pUuid,"");
         this.scanner = new BLEScannerHandler(this.pUuid);
+        this.backgroundServiceIntent = new Intent(this, BLEService.class);
         this.handler = new Handler();
 
         this.runnable = new Runnable() {
@@ -129,9 +135,13 @@ public class MainActivity extends AppCompatActivity {
         isAdvertising = setAdvertising;
         if(isAdvertising){
             advertisingStandby = true;
+
+            startService(backgroundServiceIntent);
+
             runnable.run();
         }
         else{
+            stopService(backgroundServiceIntent);
             handler.removeCallbacksAndMessages(runnable);
             advertiser.stopAdvertising();
             scanner.stopScanning();
