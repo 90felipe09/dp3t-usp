@@ -40,6 +40,8 @@ public class RequestPackage {
         return params;
     }
 
+    public void setParams(Map<String, String> params){this.params = params;}
+
     public String getPostData(){
         return postData;
     }
