@@ -9,22 +9,24 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
     private static final int TIME_BETWEEN_SCANS = 1000;
 
-    private TextView broadcastLabel;
-    private TextView expositionLabel;
+    private Button shareWithFogButton;
+    private Switch broadcastSwitch;
 
-    private TextView debugLabel;
-
-    private Button toggleExpositionBtn;
-    private Button shareHashTableBtn;
-
+    //Safety status
+    private UserStatus status;
+    private ImageView statusImage;
+    private TextView statusLabel;
     // Bluetooth related resources
     private boolean isAdvertising;
     private boolean advertisingStandby;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BLEAdvertiserHandler advertiser;
     private BLEScannerHandler scanner;
     private ParcelUuid pUuid;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,34 +45,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initializeView();
 
+        updateUserStatus(UserStatus.outdated);
+
         if (checkPortability()) {
             initializeBLE();
         }
     }
 
-    @Override
-    public void onClick(View v){
-        if(v.getId() == R.id.btn_broadcast){
-            toggleExposition();
-        }
-        else if(v.getId() == R.id.btn_share_with_fog){
-            // Add behaviour on click
-        }
-    }
 
     private boolean checkPortability(){
         if(BluetoothAdapter.getDefaultAdapter() == null){
             Toast.makeText(this, "Bluetooth não habilitado.", Toast.LENGTH_SHORT).show();
 
-            toggleExpositionBtn.setEnabled(false);
-            shareHashTableBtn.setEnabled(false);
+            broadcastSwitch.setEnabled(false);
+            shareWithFogButton.setEnabled(false);
             return false;
         }
         if(!BluetoothAdapter.getDefaultAdapter().isMultipleAdvertisementSupported()){
             Toast.makeText(this, "Broadcast não suportado.", Toast.LENGTH_SHORT).show();
 
-            toggleExpositionBtn.setEnabled(false);
-            shareHashTableBtn.setEnabled(false);
+            broadcastSwitch.setEnabled(false);
+            shareWithFogButton.setEnabled(false);
 
             return false;
         }
@@ -78,15 +73,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initializeView(){
-        broadcastLabel = (TextView) findViewById(R.id.label_broadcast_status);
-        expositionLabel = (TextView) findViewById(R.id.label_exposition_status);
-        debugLabel = (TextView) findViewById(R.id.label_debug);
+        broadcastSwitch = findViewById(R.id.switch_broadcast);
+        shareWithFogButton = findViewById(R.id.btn_share_with_fog);
+        statusImage = findViewById(R.id.img_exposition_status);
+        statusLabel = findViewById(R.id.label_exposition_status);
 
-        toggleExpositionBtn = (Button) findViewById(R.id.btn_broadcast);
-        shareHashTableBtn = (Button) findViewById(R.id.btn_share_with_fog);
 
-        toggleExpositionBtn.setOnClickListener(this);
-        shareHashTableBtn.setOnClickListener(this);
+        broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setExposition(isChecked);
+            }
+        });
+
+        shareWithFogButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //TODO IMPL : add share with fog function, and update Status
+            }
+        });
     }
 
     private void initializeBLE(){
@@ -122,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
     }
 
-    private void toggleExposition(){
-        isAdvertising = !isAdvertising;
+    private void setExposition(boolean setAdvertising){
+        isAdvertising = setAdvertising;
         if(isAdvertising){
             advertisingStandby = true;
             runnable.run();
@@ -134,5 +137,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             scanner.stopScanning();
         }
         Log.e("isAdvertising", "isAdvertising: " + isAdvertising);
+    }
+
+
+    private enum UserStatus {
+        safe,
+        outdated,
+        exposed
+    }
+
+    private void updateUserStatus(UserStatus status){
+        switch (status){
+            case safe:
+                setSafeStatus();
+            case outdated:
+                setOutdatedStatus();
+            case exposed:
+                setExposedStatus();
+        }
+    }
+
+    private void setSafeStatus() {
+        //todo fe
+        status = UserStatus.safe;
+    }
+    private void setOutdatedStatus() {
+        //todo fe
+        status = UserStatus.outdated;
+    }
+    private void setExposedStatus(){
+        //todo fe
+        status = UserStatus.exposed;
     }
 }
