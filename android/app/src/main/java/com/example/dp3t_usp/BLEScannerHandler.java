@@ -27,6 +27,8 @@ public class BLEScannerHandler {
     private ScanFilter filter;
     private ScanSettings scanSettings;
 
+    private String preventOwnHash;
+
     private Context context;
 
     private ListenedHashesHelper dbListenedHelper;
@@ -53,6 +55,10 @@ public class BLEScannerHandler {
         this.scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
+    }
+
+    public void setPreventOwnHash(String preventOwnHash){
+        this.preventOwnHash = preventOwnHash;
     }
 
     private void setFilters(ParcelUuid pUuid){
@@ -87,7 +93,9 @@ public class BLEScannerHandler {
                                     .getServiceUuids()
                                     .get(0)), Charset.forName("UTF-8")));
 
-            if (!isAlreadyInDb(builder.toString())){ writeHashToDB(builder.toString()); }
+            if (!isAlreadyInDb(builder.toString()) && builder.toString() != preventOwnHash){
+                writeHashToDB(builder.toString());
+            }
 
             debugDB();
         }

@@ -62,6 +62,7 @@ public class BLEService extends Service {
                 currentHash = currentHash + 1;
                 String hashedString = String.valueOf(currentHash);
                 advertiser.configData(hashedString, pUuid);
+                scanner.setPreventOwnHash(hashedString);
                 Log.e("Hash change", "Changed to " + hashedString);
                 handler.postDelayed(runnable, TIME_BETWEEN_HASH_CHANGES);
             }
