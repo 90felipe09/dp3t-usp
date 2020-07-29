@@ -9,6 +9,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -86,7 +87,9 @@ public class BLEScannerHandler {
                                     .getServiceUuids()
                                     .get(0)), Charset.forName("UTF-8")));
 
-            writeHashToDB(builder.toString());
+            if (!isAlreadyInDb(builder.toString())){ writeHashToDB(builder.toString()); }
+
+            debugDB();
         }
 
         @Override
@@ -100,4 +103,30 @@ public class BLEScannerHandler {
             super.onScanFailed(errorCode);
         }
     };
+
+    private void debugDB (){
+        SQLiteDatabase db = dbListenedHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ListenedHashesContract.SQL_GET_ENTRY,null);
+        cursor.moveToFirst();
+        int hashCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH);
+        int dateCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_DATE);
+        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
+        while(!cursor.isAfterLast()){
+            Log.e("dbListenedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashCollumn) + " from " + cursor.getString(dateCollumn));
+            cursor.moveToNext();
+        }
+    }
+
+    private boolean isAlreadyInDb(String newHash){
+        SQLiteDatabase db = dbListenedHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ListenedHashesContract.SQL_GET_ENTRY,null);
+        cursor.moveToFirst();
+        int hashCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH);
+        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
+        while(!cursor.isAfterLast()){
+            if(newHash == cursor.getString(hashCollumn)){return true;}
+            cursor.moveToNext();
+        }
+        return false;
+    }
 }

@@ -12,4 +12,6 @@ public final class ListenedHashesContract {
         public static final String COLUMN_LISTENED_HASH = "Hash";
         public static final String COLUMN_DATE = "Date";
     }
+
+    public static final String SQL_GET_ENTRY = "SELECT * FROM TABLE " + ListenedHashEntry.TABLE_NAME;
 }
