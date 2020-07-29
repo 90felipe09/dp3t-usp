@@ -3,6 +3,8 @@ package com.example.dp3t_usp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -31,13 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAdvertising;
     private boolean advertisingStandby;
 
-    private Handler handler;
-    private Runnable runnable;
 
-    private BLEAdvertiserHandler advertiser;
-    private BLEScannerHandler scanner;
-    private ParcelUuid pUuid;
-
+    // Background service
+    private Intent backgroundServiceIntent;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateUserStatus(UserStatus.outdated);
 
-        if (checkPortability()) {
-            initializeBLE();
-        }
+        checkPortability();
     }
 
 
@@ -69,7 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
             return false;
         }
-        else{return true;}
+        else{
+            this.backgroundServiceIntent = new Intent(this, BLEService.class);
+            return true;
+        }
     }
 
     private void initializeView(){
@@ -92,49 +92,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initializeBLE(){
-        this.pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid_dp3t)));
-        this.advertiser = new BLEAdvertiserHandler(this.pUuid,"");
-        this.scanner = new BLEScannerHandler(this.pUuid);
-        this.handler = new Handler();
-
-        this.runnable = new Runnable() {
-            @Override
-            public void run() {
-                if(isAdvertising){
-                    if(advertisingStandby){
-                        Log.e("check", "enter start advertising");
-                        try {
-                            advertiser.startAdvertising();
-                            scanner.startScanning();
-                        }
-                        catch(Exception e){
-                            Log.e("BLE", "Exception in start scan" + e.getMessage());
-                        }
-                        advertisingStandby = false;
-                    }
-                    else{
-                        Log.e("check", "enter stop advertising");
-                        advertiser.stopAdvertising();
-                        scanner.stopScanning();
-                        advertisingStandby = true;
-                    }
-                    handler.postDelayed(runnable, TIME_BETWEEN_SCANS);
-                }
-            }
-        };
-    }
-
     private void setExposition(boolean setAdvertising){
         isAdvertising = setAdvertising;
         if(isAdvertising){
             advertisingStandby = true;
-            runnable.run();
+
+            try {
+                startService(backgroundServiceIntent);
+            }
+            catch(Exception e){
+                Log.e("startService", e.getMessage());
+            }
         }
         else{
-            handler.removeCallbacksAndMessages(runnable);
-            advertiser.stopAdvertising();
-            scanner.stopScanning();
+            stopService(backgroundServiceIntent);
         }
         Log.e("isAdvertising", "isAdvertising: " + isAdvertising);
     }
