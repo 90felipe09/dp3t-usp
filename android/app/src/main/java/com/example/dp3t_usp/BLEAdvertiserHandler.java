@@ -7,6 +7,7 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 
 import android.os.ParcelUuid;
+import android.util.Log;
 
 import java.nio.charset.Charset;
 
@@ -41,7 +42,7 @@ public class BLEAdvertiserHandler{
         this.advertiser = this.bluetoothAdapter.getBluetoothLeAdvertiser();
         this.advertiseSettings = new AdvertiseSettings.Builder()
                         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
-                        .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
+                        .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
                         .setConnectable(false)
                         .build();
 
@@ -51,20 +52,25 @@ public class BLEAdvertiserHandler{
         @Override
         public void onStartSuccess (AdvertiseSettings settingsInEffect){
             super.onStartSuccess(settingsInEffect);
+            Log.e("AdvertiseCallback","It worked");
         }
 
         @Override
         public void onStartFailure(int errorCode){
+            Log.e("AdvertiseCallback","It DID NOT worked" + errorCode);
             super.onStartFailure(errorCode);
         }
     };
 
     
     public void configData(String dataToSend, ParcelUuid pUuid){
-        data = new AdvertiseData.Builder()
+        this.data = new AdvertiseData.Builder()
                         .setIncludeDeviceName(false)
                         .addServiceData(pUuid, dataToSend.getBytes(Charset.forName("UTF-8")))
                         .build();
+        stopAdvertising();
+        startAdvertising();
+
     }
 
 }
