@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Background service
     private Intent backgroundServiceIntent;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -62,6 +62,7 @@ public class BLEService extends Service {
                 currentHash = currentHash + 1;
                 String hashedString = String.valueOf(currentHash);
                 advertiser.configData(hashedString, pUuid);
+                scanner.setPreventOwnHash(hashedString);
                 Log.e("Hash change", "Changed to " + hashedString);
                 handler.postDelayed(runnable, TIME_BETWEEN_HASH_CHANGES);
             }
@@ -75,6 +76,8 @@ public class BLEService extends Service {
     @Override
     public void onDestroy() {
         mNM.cancel(NOTIFICATION);
+        advertiser.stopAdvertising();
+        scanner.stopScanning();
         handler.removeCallbacksAndMessages(runnable);
         handler.removeCallbacks(runnable);
         Toast.makeText(this, "O DP3T não está mais capturando", Toast.LENGTH_SHORT)
@@ -110,7 +113,7 @@ public class BLEService extends Service {
     private void initializeBLE(){
         this.pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid_dp3t)));
         this.advertiser = new BLEAdvertiserHandler(this.pUuid,"0");
-        this.scanner = new BLEScannerHandler(this.pUuid);
+        this.scanner = new BLEScannerHandler(this.pUuid, this);
     }
 
 }
