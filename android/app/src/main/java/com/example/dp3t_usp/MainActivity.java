@@ -1,5 +1,6 @@
 package com.example.dp3t_usp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
@@ -17,6 +18,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.dp3t_usp.APIService.APIService;
+import com.example.dp3t_usp.APIService.FirebaseAPIService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +42,21 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAdvertising;
     private boolean advertisingStandby;
 
+    // Api
+    private APIService apiService;
+    private ArrayList<String> hashes;
+
+
+
+    class onGetHashesSuccessCallbackImpl implements APIService.onGetHashesSuccessCallback {
+        @Override
+        public void callback(ArrayList<String> newHashes) {
+            hashes = newHashes;
+            Log.i("callback", ""+newHashes);
+        }
+    }
+
+
 
     // Background service
     private Intent backgroundServiceIntent;
@@ -42,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        this.apiService = new FirebaseAPIService();
+
         initializeView();
 
         updateUserStatus(UserStatus.outdated);
 
         checkPortability();
+
+
     }
 
 
@@ -79,8 +107,12 @@ public class MainActivity extends AppCompatActivity {
         statusLabel = findViewById(R.id.label_exposition_status);
 
 
+
+
         broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
                 setExposition(isChecked);
             }
         });
@@ -88,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         shareWithFogButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //TODO IMPL : add share with fog function, and update Status
+                apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
             }
         });
     }
