@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 // Um helper é uma classe que gerencia um banco de dados. Ele cria, atualiza e destrói tabelas.
 public class EmittedHashesHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "ListenedHashes.db";
+    public static final String DATABASE_NAME = "EmittedHashes.db";
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
             + EmittedHashesContract.TABLE_NAME + " ("

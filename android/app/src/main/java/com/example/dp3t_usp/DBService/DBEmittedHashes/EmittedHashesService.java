@@ -49,9 +49,9 @@ public class EmittedHashesService implements DBServiceInterface<EmittedHashesDat
         cursor.moveToFirst();
         int hashColumn = cursor.getColumnIndex(EmittedHashesContract.COLUMN_EMITTED_HASH);
         int dateColumn = cursor.getColumnIndex(EmittedHashesContract.COLUMN_DATE);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
+        Log.e("dbEmittedHashesContent", "Entries number" + cursor.getCount());
         while(!cursor.isAfterLast()){
-            Log.e("dbListenedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashColumn) + " from " + cursor.getString(dateColumn));
+            Log.e("dbEmittedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashColumn) + " from " + cursor.getString(dateColumn));
             listenedHashesData.add(new EmittedHashesData(cursor.getString(hashColumn), cursor.getString(dateColumn)));
             cursor.moveToNext();
         }
