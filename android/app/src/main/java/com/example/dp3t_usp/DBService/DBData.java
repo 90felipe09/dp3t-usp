@@ -1,14 +1,19 @@
 package com.example.dp3t_usp.DBService;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DBData implements DBDataInterface {
     public static HashMap<String,Class> fieldsTypes = new HashMap<>();
-    public HashMap<String,Object> values = new HashMap<>();
+    private HashMap<String,String> values = new HashMap<>();
 
     @Override
-    public Object getField(String field) {
+    public String getField(String field) {
+        Log.e("getField", field);
+        Log.e("getField", this.values.toString());
+        Log.e("getField", this.values.get(field));
         return values.get(field);
     }
 
@@ -27,11 +32,14 @@ public class DBData implements DBDataInterface {
 
     @Override
     public void setFields(HashMap newValues) {
+        Log.e("setField", newValues.toString());
+        Log.e("setField", values.toString());
         this.values = newValues;
+        Log.e("setField", values.toString());
     }
 
     @Override
-    public void setField(String field, Object newValue) {
+    public void setField(String field, String newValue) {
         this.values.remove(field);
         this.values.put(field, newValue);
     }

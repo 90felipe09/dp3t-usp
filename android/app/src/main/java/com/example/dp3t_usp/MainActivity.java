@@ -21,12 +21,20 @@ import android.widget.Toast;
 import com.example.dp3t_usp.APIService.APIService;
 import com.example.dp3t_usp.APIService.FirebaseAPIService;
 import com.example.dp3t_usp.BLEService.BLEService;
+import com.example.dp3t_usp.CheckupService.SyncedService;
+import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesData;
+import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesService;
+import com.example.dp3t_usp.DBService.DBLastCheck.LastCheckData;
+import com.example.dp3t_usp.DBService.DBLastCheck.LastCheckService;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,16 +53,47 @@ public class MainActivity extends AppCompatActivity {
 
     // Api
     private APIService apiService;
-    private ArrayList<String> hashes;
+//    private ArrayList<String> hashes;
 
-
+    InfectedHashesService infectedHashesService;
+    LastCheckService lastCheckService;
 
     class onGetHashesSuccessCallbackImpl implements APIService.onGetHashesSuccessCallback {
         @Override
         public void callback(ArrayList<String> newHashes) {
-            hashes = newHashes;
+            ArrayList<String> hashes = newHashes;
+
+            Iterator<String> iterator = hashes.iterator();
+
+            String currentHash;
+            InfectedHashesData infectedHash;
+
+            while(iterator.hasNext()){
+                currentHash = iterator.next();
+
+                if(!infectedHashesService.isInDb(currentHash)){
+                    infectedHash = new InfectedHashesData(currentHash);
+                    infectedHashesService.insertData(infectedHash);
+                }
+
+            }
+
             Log.i("callback", ""+newHashes);
+            debugDB();
+
+            LastCheckData lastCheckData = new LastCheckData(Calendar.getInstance().getTime().toString());
+            lastCheckService.insertData(lastCheckData);
         }
+    }
+
+    private void debugDB(){
+        Log.e("Log Infected Hashes DB", "========STARTING DEBUG=======");
+        ArrayList<InfectedHashesData> storedHashes = infectedHashesService.getData();
+        Iterator<InfectedHashesData> iterator = storedHashes.iterator();
+        while(iterator.hasNext()){
+            Log.e("Log Infected Hashes DB", iterator.next().values.toString());
+        }
+        Log.e("Log Infected Hashes DB", "========END DEBUG=======");
     }
 
 
@@ -75,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
         checkPortability();
 
-
+        infectedHashesService = new InfectedHashesService(this);
     }
 
 
@@ -107,13 +146,14 @@ public class MainActivity extends AppCompatActivity {
         statusImage = findViewById(R.id.img_exposition_status);
         statusLabel = findViewById(R.id.label_exposition_status);
 
-
-
+        if(!SyncedService.checkSync(this)){
+            updateUserStatus(UserStatus.outdated);
+            apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
+        }
 
         broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
                 setExposition(isChecked);
             }
         });
@@ -121,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         shareWithFogButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //TODO IMPL : add share with fog function, and update Status
-                apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
+
             }
         });
     }

@@ -8,5 +8,5 @@ public interface DBDataInterface {
     ArrayList<Object> getFields(ArrayList<String> field);
 
     void setFields(HashMap newValues);
-    void setField(String field, Object newValue);
+    void setField(String field, String newValue);
 }

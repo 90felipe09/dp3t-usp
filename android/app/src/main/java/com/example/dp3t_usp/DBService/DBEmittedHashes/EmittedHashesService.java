@@ -19,12 +19,15 @@ public class EmittedHashesService implements DBServiceInterface<EmittedHashesDat
 
     @Override
     public void insertData(EmittedHashesData dbData) {
-        SQLiteDatabase listenedHashesDB = this.emittedHashesHelper.getWritableDatabase();
+        Log.e("insertData",  dbData.values.toString());
+        Log.e("insertData", dbData.getField("Hash"));
+        SQLiteDatabase emittedHashesDB = this.emittedHashesHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(EmittedHashesContract.COLUMN_EMITTED_HASH, dbData.getField(EmittedHashesContract.COLUMN_EMITTED_HASH).toString());
-        values.put(EmittedHashesContract.COLUMN_DATE, dbData.getField(EmittedHashesContract.COLUMN_DATE).toString());
+        values.put(EmittedHashesContract.COLUMN_EMITTED_HASH, dbData.getField(EmittedHashesContract.COLUMN_EMITTED_HASH));
+        values.put(EmittedHashesContract.COLUMN_DATE, dbData.getField(EmittedHashesContract.COLUMN_DATE));
+        Log.e("insertDataFINAL",  values.toString());
 
-        listenedHashesDB.insert(EmittedHashesContract.TABLE_NAME, null, values);
+        emittedHashesDB.insert(EmittedHashesContract.TABLE_NAME, null, values);
     }
 
     @Override

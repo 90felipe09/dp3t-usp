@@ -37,9 +37,12 @@ public class LastCheckService implements DBServiceInterface<LastCheckData> {
     public ArrayList<LastCheckData> getData() {
         SQLiteDatabase lastCheckDB = this.lastCheckHelper.getReadableDatabase();
         ArrayList<LastCheckData> lastCheckData = new ArrayList<>();
-        Cursor cursor = lastCheckDB.rawQuery(InfectedHashesContract.SQL_GET_ENTRY,null);
+        Cursor cursor = lastCheckDB.rawQuery(LastCheckContract.SQL_GET_ENTRY,null);
         cursor.moveToFirst();
-        int dateColumn = cursor.getColumnIndex(InfectedHashesContract.COLUMN_DATE);
+        if(cursor.getCount() == 0){
+            return null;
+        }
+        int dateColumn = cursor.getColumnIndex(LastCheckContract.COLUMN_DATE);
         Log.e("dbLastCheckContent", "Entries number" + cursor.getCount());
         Log.e("dbLastCheckContent", "Entry " + cursor.getPosition() + ": from " + cursor.getString(dateColumn));
         lastCheckData.add(new LastCheckData(cursor.getString(dateColumn)));

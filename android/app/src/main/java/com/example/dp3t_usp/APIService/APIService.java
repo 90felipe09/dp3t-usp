@@ -12,7 +12,7 @@ public interface APIService {
         public void callback(ArrayList<String> hashes);
     }
 
-    public void sendHashes(ArrayList hashes);
+    public void sendHashes(ArrayList<String> hashes);
 
     public void getInfectedHashes(final onGetHashesSuccessCallback successCallback);
 

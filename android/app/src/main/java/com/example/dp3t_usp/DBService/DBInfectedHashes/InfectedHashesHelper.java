@@ -3,12 +3,13 @@ package com.example.dp3t_usp.DBService.DBInfectedHashes;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 
 // Um helper é uma classe que gerencia um banco de dados. Ele cria, atualiza e destrói tabelas.
 public class InfectedHashesHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "ListenedHashes.db";
+    public static final int DATABASE_VERSION = 4;
+    public static final String DATABASE_NAME = "InfectedHashes.db";
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
             + InfectedHashesContract.TABLE_NAME + " ("
@@ -23,10 +24,12 @@ public class InfectedHashesHelper extends SQLiteOpenHelper {
     }
 
     public void onCreate(SQLiteDatabase db){
+        Log.e("NewDBINfected", "NEW DB INFECTED");
         db.execSQL(SQL_CREATE_ENTRIES);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
+        Log.e("NewDB","NEW DB");
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }

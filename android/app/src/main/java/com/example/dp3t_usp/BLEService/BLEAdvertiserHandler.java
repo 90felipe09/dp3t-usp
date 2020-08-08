@@ -16,7 +16,10 @@ import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesData;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class BLEAdvertiserHandler{
@@ -32,11 +35,12 @@ public class BLEAdvertiserHandler{
 
     // Public domain
     public BLEAdvertiserHandler(ParcelUuid uuid, String data, Context context){
+        this.emittedHashesService = new EmittedHashesService(context);
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         configAdvertiser(uuid);
         configData(data, uuid);
 
-        emittedHashesService = new EmittedHashesService(context);
+
 }
 
     public void startAdvertising(){
@@ -79,8 +83,9 @@ public class BLEAdvertiserHandler{
                         .setIncludeDeviceName(false)
                         .addServiceData(pUuid, dataToSend.getBytes(Charset.forName("UTF-8")))
                         .build();
-        EmittedHashesData emittedHash = new EmittedHashesData(dataToSend, new Date().toString());
-        emittedHashesService.insertData(emittedHash);
+        EmittedHashesData emittedHash = new EmittedHashesData(dataToSend, Calendar.getInstance().getTime().toString());
+        Log.e("BLEAdvert:emittedHash:", emittedHash.values.toString());
+        this.emittedHashesService.insertData(emittedHash);
         debugDB();
         stopAdvertising();
         startAdvertising();
@@ -88,13 +93,16 @@ public class BLEAdvertiserHandler{
     }
 
     void debugDB(){
+
         Log.e("Log Emitted Hashes DB", "========STARTING DEBUG=======");
         ArrayList<EmittedHashesData> storedHashes = emittedHashesService.getData();
 
-        while(storedHashes.iterator().hasNext()){
-            Log.e("Log Emitted Hashes DB", storedHashes.iterator().next().values.toString());
+        Iterator<EmittedHashesData> iterator = storedHashes.iterator();
+        while(iterator.hasNext()){
+            Log.e("Log Emitted Hashes DB", iterator.next().values.toString());
         }
         Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
+        emittedHashesService.deleteAllData();
     }
 
 }

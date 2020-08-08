@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class BLEScannerHandler {
@@ -116,9 +117,9 @@ public class BLEScannerHandler {
         void debugDB(){
             Log.e("Log Listened Hashes DB", "========STARTING DEBUG=======");
             ArrayList<ListenedHashesData> storedHashes = dbListenedHashes.getData();
-
-            while(storedHashes.iterator().hasNext()){
-                Log.e("Log Listened Hashes DB", storedHashes.iterator().next().values.toString());
+            Iterator<ListenedHashesData> iterator = storedHashes.iterator();
+            while(iterator.hasNext()){
+                Log.e("Log Listened Hashes DB", iterator.next().values.toString());
             }
             Log.e("Log Listened Hashes DB", "========END DEBUG=======");
         }

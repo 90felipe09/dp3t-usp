@@ -22,7 +22,7 @@ public class FirebaseAPIService implements APIService {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    public void sendHashes(ArrayList hashes){
+    public void sendHashes(ArrayList<String> hashes){
         return;
     }
 

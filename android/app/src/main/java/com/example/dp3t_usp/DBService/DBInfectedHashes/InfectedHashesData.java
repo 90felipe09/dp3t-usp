@@ -2,6 +2,7 @@ package com.example.dp3t_usp.DBService.DBInfectedHashes;
 
 import com.example.dp3t_usp.DBService.DBData;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -24,7 +25,7 @@ public class InfectedHashesData extends DBData  {
     public void setValues(String hash){
         HashMap<String, Object> newValues = new HashMap<>();
         newValues.put(InfectedHashesContract.COLUMN_INFECTED_HASH, hash);
-        newValues.put(InfectedHashesContract.COLUMN_DATE, new Date());
+        newValues.put(InfectedHashesContract.COLUMN_DATE, Calendar.getInstance().getTime().toString());
         this.values = newValues;
     }
     public void setValues(String hash, String date){
