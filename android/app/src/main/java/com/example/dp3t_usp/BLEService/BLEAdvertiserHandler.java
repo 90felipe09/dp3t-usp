@@ -6,10 +6,17 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 
+import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.example.dp3t_usp.DBService.DBEmittedHashes.EmittedHashesData;
+import com.example.dp3t_usp.DBService.DBEmittedHashes.EmittedHashesService;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesData;
+
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Date;
 
 
 public class BLEAdvertiserHandler{
@@ -21,11 +28,15 @@ public class BLEAdvertiserHandler{
     
     private BluetoothAdapter bluetoothAdapter;
 
+    private EmittedHashesService emittedHashesService;
+
     // Public domain
-    public BLEAdvertiserHandler(ParcelUuid uuid, String data){
+    public BLEAdvertiserHandler(ParcelUuid uuid, String data, Context context){
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         configAdvertiser(uuid);
         configData(data, uuid);
+
+        emittedHashesService = new EmittedHashesService(context);
 }
 
     public void startAdvertising(){
@@ -68,10 +79,22 @@ public class BLEAdvertiserHandler{
                         .setIncludeDeviceName(false)
                         .addServiceData(pUuid, dataToSend.getBytes(Charset.forName("UTF-8")))
                         .build();
-
+        EmittedHashesData emittedHash = new EmittedHashesData(dataToSend, new Date().toString());
+        emittedHashesService.insertData(emittedHash);
+        debugDB();
         stopAdvertising();
         startAdvertising();
 
+    }
+
+    void debugDB(){
+        Log.e("Log Emitted Hashes DB", "========STARTING DEBUG=======");
+        ArrayList<EmittedHashesData> storedHashes = emittedHashesService.getData();
+
+        while(storedHashes.iterator().hasNext()){
+            Log.e("Log Emitted Hashes DB", storedHashes.iterator().next().values.toString());
+        }
+        Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
     }
 
 }

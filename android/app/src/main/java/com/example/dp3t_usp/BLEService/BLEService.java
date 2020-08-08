@@ -115,7 +115,7 @@ public class BLEService extends Service {
     }
     private void initializeBLE(){
         this.pUuid = new ParcelUuid(UUID.fromString(getString(R.string.ble_uuid_dp3t)));
-        this.advertiser = new BLEAdvertiserHandler(this.pUuid,"0");
+        this.advertiser = new BLEAdvertiserHandler(this.pUuid,"0", this);
         this.scanner = new BLEScannerHandler(this.pUuid, this);
     }
 
