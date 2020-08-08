@@ -1,4 +1,4 @@
-package com.example.dp3t_usp;
+package com.example.dp3t_usp.DBService.DBListenedHashes;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,12 +11,12 @@ public class ListenedHashesHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "ListenedHashes.db";
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
-            + ListenedHashesContract.ListenedHashEntry.TABLE_NAME + " ("
-            + ListenedHashesContract.ListenedHashEntry._ID + " INTEGER PRIMARY KEY,"
-            + ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH + " TEXT,"
-            + ListenedHashesContract.ListenedHashEntry.COLUMN_DATE + " TEXT)";
+            + ListenedHashesContract.TABLE_NAME + " ("
+            + ListenedHashesContract._ID + " INTEGER PRIMARY KEY,"
+            + ListenedHashesContract.COLUMN_LISTENED_HASH + " TEXT,"
+            + ListenedHashesContract.COLUMN_DATE + " TEXT)";
 
-    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + ListenedHashesContract.ListenedHashEntry.TABLE_NAME;
+    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + ListenedHashesContract.TABLE_NAME;
 
     public ListenedHashesHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

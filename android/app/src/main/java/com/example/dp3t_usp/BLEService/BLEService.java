@@ -1,4 +1,4 @@
-package com.example.dp3t_usp;
+package com.example.dp3t_usp.BLEService;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -10,6 +10,9 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.dp3t_usp.MainActivity;
+import com.example.dp3t_usp.R;
 
 import java.util.UUID;
 
@@ -97,7 +100,7 @@ public class BLEService extends Service {
                 getActivity(
                         this,
                         0,
-                        new Intent(this,MainActivity.class),
+                        new Intent(this, MainActivity.class),
                         0); // Se o usuário clicar na notificação, o app vai abrir.
         Notification notification = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_baseline_local_hospital_24)

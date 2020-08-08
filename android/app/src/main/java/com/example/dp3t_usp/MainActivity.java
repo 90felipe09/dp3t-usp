@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.dp3t_usp.APIService.APIService;
 import com.example.dp3t_usp.APIService.FirebaseAPIService;
+import com.example.dp3t_usp.BLEService.BLEService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;

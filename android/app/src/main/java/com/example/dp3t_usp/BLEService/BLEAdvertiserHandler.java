@@ -1,4 +1,4 @@
-package com.example.dp3t_usp;
+package com.example.dp3t_usp.BLEService;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.AdvertiseCallback;
@@ -68,6 +68,7 @@ public class BLEAdvertiserHandler{
                         .setIncludeDeviceName(false)
                         .addServiceData(pUuid, dataToSend.getBytes(Charset.forName("UTF-8")))
                         .build();
+
         stopAdvertising();
         startAdvertising();
 
