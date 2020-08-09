@@ -53,6 +53,21 @@
             app:layout_constraintHorizontal_bias="0.509"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <TextView
+            android:id="@+id/exposed_recomendation"
+            android:layout_width="379dp"
+            android:layout_height="wrap_content"
+            android:text="Você foi exposto recentemente a alguem infectado, busque por orientações e fique em casa!"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="#FF0000"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/switch_broadcast"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/img_exposition_status" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

@@ -28,11 +28,11 @@ public class SyncedService {
             return false;
         }
 
-        Date lastTime = DateService.parseString(lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE));
-
-        if (actualTime.after(lastTime)){
+        if(lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE) == null){
             return false;
         }
+        Date lastTime = DateService.parseString(lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE));
+
         Log.e("lastCheckData", lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE));
         return true;
     }

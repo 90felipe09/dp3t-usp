@@ -36,6 +36,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import android.view.View;
+
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private UserStatus status;
     private ImageView statusImage;
     private TextView statusLabel;
+    private TextView exposedRecommendation;
     // Bluetooth related resources
     private boolean isAdvertising;
     private boolean advertisingStandby;
@@ -187,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
         shareWithFogButton = findViewById(R.id.btn_share_with_fog);
         statusImage = findViewById(R.id.img_exposition_status);
         statusLabel = findViewById(R.id.label_exposition_status);
+        exposedRecommendation = findViewById(R.id.exposed_recomendation);
 
         if(!SyncedService.checkSync(this)){
             updateUserStatus(UserStatus.outdated);
@@ -273,17 +277,20 @@ public class MainActivity extends AppCompatActivity {
         statusLabel.setText("Você está seguro");
         statusImage.setImageResource(R.drawable.ic_baseline_check_circle_24);
         statusImage.setColorFilter(Color.GREEN);
+        exposedRecommendation.setVisibility(View.GONE);
     }
     private void setOutdatedStatus() {
         status = UserStatus.outdated;
         statusLabel.setText("Dados desatualizados");
         statusImage.setImageResource(R.drawable.ic_baseline_sync_problem_24);
         statusImage.setColorFilter(Color.BLUE);
+        exposedRecommendation.setVisibility(View.GONE);
     }
     private void setExposedStatus(){
         status = UserStatus.exposed;
         statusLabel.setText("Você foi exposto!");
         statusImage.setImageResource(R.drawable.ic_baseline_warning_24);
         statusImage.setColorFilter(Color.RED);
+        exposedRecommendation.setVisibility(View.VISIBLE);
     }
 }
