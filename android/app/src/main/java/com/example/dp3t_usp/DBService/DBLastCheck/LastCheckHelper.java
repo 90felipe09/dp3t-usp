@@ -1,4 +1,4 @@
-package com.example.dp3t_usp;
+package com.example.dp3t_usp.DBService.DBLastCheck;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,19 +6,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
 // Um helper é uma classe que gerencia um banco de dados. Ele cria, atualiza e destrói tabelas.
-public class ListenedHashesHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "ListenedHashes.db";
+public class LastCheckHelper extends SQLiteOpenHelper {
+    public static final int DATABASE_VERSION = 2;
+    public static final String DATABASE_NAME = "LastCheck.db";
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
-            + ListenedHashesContract.ListenedHashEntry.TABLE_NAME + " ("
-            + ListenedHashesContract.ListenedHashEntry._ID + " INTEGER PRIMARY KEY,"
-            + ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH + " TEXT,"
-            + ListenedHashesContract.ListenedHashEntry.COLUMN_DATE + " TEXT)";
+            + LastCheckContract.TABLE_NAME + " ("
+            + LastCheckContract._ID + " INTEGER PRIMARY KEY,"
+            + LastCheckContract.COLUMN_DATE + " TEXT)";
 
-    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + ListenedHashesContract.ListenedHashEntry.TABLE_NAME;
+    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + LastCheckContract.TABLE_NAME;
 
-    public ListenedHashesHelper(Context context){
+    public LastCheckHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

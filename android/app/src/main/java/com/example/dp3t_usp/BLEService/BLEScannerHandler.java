@@ -1,4 +1,4 @@
-package com.example.dp3t_usp;
+package com.example.dp3t_usp.BLEService;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -14,9 +14,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesContract;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesData;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesHelper;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesService;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class BLEScannerHandler {
@@ -31,7 +38,7 @@ public class BLEScannerHandler {
 
     private Context context;
 
-    private ListenedHashesHelper dbListenedHelper;
+    private ListenedHashesService dbListenedHashes;
 
     // Public domain
     public BLEScannerHandler(ParcelUuid pUuid, Context context){
@@ -39,7 +46,7 @@ public class BLEScannerHandler {
         configScanner();
         setFilters(pUuid);
         this.context = context;
-        this.dbListenedHelper = new ListenedHashesHelper(context);
+        this.dbListenedHashes = new ListenedHashesService(context);
     }
 
     public void startScanning(){
@@ -71,13 +78,8 @@ public class BLEScannerHandler {
 
     // Add a hash to the ListenedHashes table
     private void writeHashToDB(String hash){
-        SQLiteDatabase db = dbListenedHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH, hash);
-        values.put(ListenedHashesContract.ListenedHashEntry.COLUMN_DATE, new Date().toString());
-
-        db.insert(ListenedHashesContract.ListenedHashEntry.TABLE_NAME, null, values);
+        ListenedHashesData listenedHashesData = new ListenedHashesData(hash);
+        dbListenedHashes.insertData(listenedHashesData);
     }
 
     private ScanCallback scanCallback = new ScanCallback() {
@@ -93,11 +95,12 @@ public class BLEScannerHandler {
                                     .getServiceUuids()
                                     .get(0)), Charset.forName("UTF-8")));
 
-            if (!isAlreadyInDb(builder.toString()) && builder.toString() != preventOwnHash){
+            if (!dbListenedHashes.isInDb(builder.toString()) && builder.toString() != preventOwnHash){
                 writeHashToDB(builder.toString());
             }
 
             debugDB();
+
         }
 
         @Override
@@ -110,31 +113,16 @@ public class BLEScannerHandler {
             Log.e("BLE", "Error on scanning: " + errorCode);
             super.onScanFailed(errorCode);
         }
+
+        void debugDB(){
+            Log.e("Log Listened Hashes DB", "========STARTING DEBUG=======");
+            ArrayList<ListenedHashesData> storedHashes = dbListenedHashes.getData();
+            Iterator<ListenedHashesData> iterator = storedHashes.iterator();
+            while(iterator.hasNext()){
+                Log.e("Log Listened Hashes DB", iterator.next().values.toString());
+            }
+            Log.e("Log Listened Hashes DB", "========END DEBUG=======");
+        }
     };
 
-    private void debugDB (){
-        SQLiteDatabase db = dbListenedHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(ListenedHashesContract.SQL_GET_ENTRY,null);
-        cursor.moveToFirst();
-        int hashCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH);
-        int dateCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_DATE);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
-        while(!cursor.isAfterLast()){
-            Log.e("dbListenedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashCollumn) + " from " + cursor.getString(dateCollumn));
-            cursor.moveToNext();
-        }
-    }
-
-    private boolean isAlreadyInDb(String newHash){
-        SQLiteDatabase db = dbListenedHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(ListenedHashesContract.SQL_GET_ENTRY,null);
-        cursor.moveToFirst();
-        int hashCollumn = cursor.getColumnIndex(ListenedHashesContract.ListenedHashEntry.COLUMN_LISTENED_HASH);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
-        while(!cursor.isAfterLast()){
-            if(newHash == cursor.getString(hashCollumn)){return true;}
-            cursor.moveToNext();
-        }
-        return false;
-    }
 }

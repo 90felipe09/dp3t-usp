@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".BLEService"
+            android:name=".BLEService.BLEService"
             android:exported="false"></service>
 
         <activity android:name=".MainActivity">
