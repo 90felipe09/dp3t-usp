@@ -11,6 +11,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.dp3t_usp.HashGenerator;
 import com.example.dp3t_usp.MainActivity;
 import com.example.dp3t_usp.R;
 
@@ -32,7 +33,7 @@ public class BLEService extends Service {
     private Runnable runnable;
 
 
-//    private static int TIME_BETWEEN_HASH_CHANGES = 1000; for tests
+//    private static int TIME_BETWEEN_HASH_CHANGES = 1000; //for tests
     private static int TIME_BETWEEN_HASH_CHANGES = 1000 * 60 * 5;
 
     public BLEService() {
@@ -67,9 +68,10 @@ public class BLEService extends Service {
                 // currentHash = currentHash + 1;
                 hash = hashgenerator.Generate();
                 // String hashedString = String.valueOf(currentHash);
-                advertiser.configData(hashedString, pUuid);
-                scanner.setPreventOwnHash(hashedString);
-                Log.e("Hash change", "Changed to " + hashedString);
+                Log.e("PARCELUUID", pUuid.toString());
+                advertiser.configData(hash, pUuid);
+                scanner.setPreventOwnHash(hash);
+                Log.e("Hash change", "Changed to " + hash);
                 handler.postDelayed(runnable, TIME_BETWEEN_HASH_CHANGES);
             }
         };
