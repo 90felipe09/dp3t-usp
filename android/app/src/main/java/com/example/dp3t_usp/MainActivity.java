@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.example.dp3t_usp.APIService.APIService;
 import com.example.dp3t_usp.APIService.FirebaseAPIService;
 import com.example.dp3t_usp.BLEService.BLEService;
+import com.example.dp3t_usp.CheckupService.CheckupService;
 import com.example.dp3t_usp.CheckupService.SyncedService;
 import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesData;
 import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesService;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     InfectedHashesService infectedHashesService;
     LastCheckService lastCheckService;
+    CheckupService checkupService;
 
     class onGetHashesSuccessCallbackImpl implements APIService.onGetHashesSuccessCallback {
         @Override
@@ -83,6 +85,13 @@ public class MainActivity extends AppCompatActivity {
 
             LastCheckData lastCheckData = new LastCheckData(Calendar.getInstance().getTime().toString());
             lastCheckService.insertData(lastCheckData);
+
+            if(checkupService.wasExposed()){
+                updateUserStatus(UserStatus.exposed);
+            }
+            else{
+                updateUserStatus(UserStatus.safe);
+            }
         }
     }
 
@@ -115,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         checkPortability();
 
         infectedHashesService = new InfectedHashesService(this);
+        checkupService = new CheckupService(this);
     }
 
 
