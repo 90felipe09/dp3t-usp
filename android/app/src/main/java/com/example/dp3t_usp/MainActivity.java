@@ -23,6 +23,9 @@ import com.example.dp3t_usp.APIService.FirebaseAPIService;
 import com.example.dp3t_usp.BLEService.BLEService;
 import com.example.dp3t_usp.CheckupService.CheckupService;
 import com.example.dp3t_usp.CheckupService.SyncedService;
+import com.example.dp3t_usp.DBService.DBEmittedHashes.EmittedHashesContract;
+import com.example.dp3t_usp.DBService.DBEmittedHashes.EmittedHashesData;
+import com.example.dp3t_usp.DBService.DBEmittedHashes.EmittedHashesService;
 import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesData;
 import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesService;
 import com.example.dp3t_usp.DBService.DBLastCheck.LastCheckData;
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     InfectedHashesService infectedHashesService;
     LastCheckService lastCheckService;
     CheckupService checkupService;
+    EmittedHashesService emittedHashesService;
 
     class onGetHashesSuccessCallbackImpl implements APIService.onGetHashesSuccessCallback {
         @Override
@@ -105,6 +109,30 @@ public class MainActivity extends AppCompatActivity {
         Log.e("Log Infected Hashes DB", "========END DEBUG=======");
     }
 
+    class onPostHashesSuccessCallbackImpl implements APIService.onPostHashesSuccessCallback {
+        @Override
+        public void callback() {
+            Log.e("PostHashes", "Hashes posted successfully, callback called");
+        }
+
+        @Override
+        public void onSuccess(Object o) {
+            Log.e("PostHashes", "Hashes posted successfully");
+        }
+    }
+
+    class onPostHashesFailureCallbackImpl implements APIService.onPostHashesFailureCallback{
+        @Override
+        public void callback() {
+            Log.e("PostHashes", "Hashes post has failed, callback called");
+        }
+
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            Log.e("PostHashes", "Hashes post has failed");
+        }
+    }
+
 
 
     // Background service
@@ -125,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
         infectedHashesService = new InfectedHashesService(this);
         checkupService = new CheckupService(this);
+        emittedHashesService = new EmittedHashesService(this);
     }
 
 
@@ -171,7 +200,16 @@ public class MainActivity extends AppCompatActivity {
         shareWithFogButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //TODO IMPL : add share with fog function, and update Status
-
+                ArrayList<EmittedHashesData> emittedHashes = emittedHashesService.getData();
+                Iterator<EmittedHashesData> iterator = emittedHashes.iterator();
+                ArrayList<String> hashesToSend = new ArrayList<>();
+                String columnHashName = EmittedHashesContract.COLUMN_EMITTED_HASH;
+                while(iterator.hasNext()){
+                    hashesToSend.add(iterator.next().getField(columnHashName));
+                }
+                apiService.sendHashes(hashesToSend,
+                        new onPostHashesSuccessCallbackImpl(),
+                        new onPostHashesFailureCallbackImpl());
             }
         });
     }

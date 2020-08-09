@@ -6,11 +6,14 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FirebaseAPIService implements APIService {
 
@@ -22,8 +25,15 @@ public class FirebaseAPIService implements APIService {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    public void sendHashes(ArrayList<String> hashes){
-        return;
+    public void sendHashes(ArrayList<String> hashes, final onPostHashesSuccessCallback successCallback, final onPostHashesFailureCallback failureCallback){
+        this.db.collection("hashes-lists").document("hashes");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("hashes", hashes);
+        db.collection("hashes-lists")
+                .add(data)
+                .addOnSuccessListener(successCallback)
+                .addOnFailureListener(failureCallback);
     }
 
     public void getInfectedHashes(final onGetHashesSuccessCallback successCallback ){
