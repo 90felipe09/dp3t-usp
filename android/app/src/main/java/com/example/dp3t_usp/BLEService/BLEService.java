@@ -24,6 +24,8 @@ public class BLEService extends Service {
     private BLEScannerHandler scanner;
     private ParcelUuid pUuid;
 
+    private HashGenerator hashgenerator = new HashGenerator();
+    private String hash = hashgenerator.Generate();
     private int currentHash = 0;
 
     private Handler handler;
@@ -62,8 +64,9 @@ public class BLEService extends Service {
         this.runnable = new Runnable() {
             @Override
             public void run() {
-                currentHash = currentHash + 1;
-                String hashedString = String.valueOf(currentHash);
+                // currentHash = currentHash + 1;
+                hash = hashgenerator.Generate();
+                // String hashedString = String.valueOf(currentHash);
                 advertiser.configData(hashedString, pUuid);
                 scanner.setPreventOwnHash(hashedString);
                 Log.e("Hash change", "Changed to " + hashedString);
