@@ -21,8 +21,10 @@ public class InfectedHashesService implements DBServiceInterface<InfectedHashesD
     public void insertData(InfectedHashesData dbData) {
         SQLiteDatabase infectedHashesDB = this.infectedHashesHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(InfectedHashesContract.COLUMN_INFECTED_HASH, dbData.getField(InfectedHashesContract.COLUMN_INFECTED_HASH).toString());
-        values.put(InfectedHashesContract.COLUMN_DATE, dbData.getField(InfectedHashesContract.COLUMN_DATE).toString());
+        Log.e("insertDataInfected", dbData.values.toString());
+        Log.e("insertDataInfected", dbData.getField("Hash"));
+        values.put(InfectedHashesContract.COLUMN_INFECTED_HASH, dbData.getField(InfectedHashesContract.COLUMN_INFECTED_HASH));
+        values.put(InfectedHashesContract.COLUMN_DATE, dbData.getField(InfectedHashesContract.COLUMN_DATE));
 
         infectedHashesDB.insert(InfectedHashesContract.TABLE_NAME, null, values);
     }
@@ -49,9 +51,9 @@ public class InfectedHashesService implements DBServiceInterface<InfectedHashesD
         cursor.moveToFirst();
         int hashColumn = cursor.getColumnIndex(InfectedHashesContract.COLUMN_INFECTED_HASH);
         int dateColumn = cursor.getColumnIndex(InfectedHashesContract.COLUMN_DATE);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
-        while(!cursor.isAfterLast()){
-            Log.e("dbListenedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashColumn) + " from " + cursor.getString(dateColumn));
+        Log.e("dbInfectedHashesContent", "Entries number " + cursor.getCount());
+        while(!cursor.isAfterLast() && cursor.getCount() != 0){
+            Log.e("dbInfectedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashColumn) + " from " + cursor.getString(dateColumn));
             listenedHashesData.add(new InfectedHashesData(cursor.getString(hashColumn), cursor.getString(dateColumn)));
             cursor.moveToNext();
         }
@@ -96,12 +98,14 @@ public class InfectedHashesService implements DBServiceInterface<InfectedHashesD
 
     @Override
     public boolean isInDb(String hash){
+        Log.e("IsInDB", "IsInDB infected");
         SQLiteDatabase db = infectedHashesHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(InfectedHashesContract.SQL_GET_ENTRY,null);
         cursor.moveToFirst();
         int hashColumn = cursor.getColumnIndex(InfectedHashesContract.COLUMN_INFECTED_HASH);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
-        while(!cursor.isAfterLast()){
+        Log.e("dbInfectedHashesContent", "Entries number" + cursor.getCount());
+        while(!cursor.isAfterLast() && cursor.getCount() != 0){
+            Log.e("IsInDB", "Executed while and number of entries is: " + cursor.getCount());
             if(hash == cursor.getString(hashColumn)){return true;}
             cursor.moveToNext();
         }
