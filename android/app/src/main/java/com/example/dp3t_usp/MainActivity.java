@@ -145,17 +145,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.apiService = new FirebaseAPIService();
-
-        initializeView();
-
-        updateUserStatus(UserStatus.outdated);
-
-        checkPortability();
-
         infectedHashesService = new InfectedHashesService(this);
         checkupService = new CheckupService(this);
         emittedHashesService = new EmittedHashesService(this);
         lastCheckService = new LastCheckService(this);
+
+        initializeView();
+
+        //updateUserStatus(UserStatus.outdated);
+
+        checkPortability();
+
+
     }
 
 
@@ -190,6 +191,17 @@ public class MainActivity extends AppCompatActivity {
         if(!SyncedService.checkSync(this)){
             updateUserStatus(UserStatus.outdated);
             apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
+        }
+        else{
+            Log.e("Is already Synced", "Is synced");
+            if(checkupService.wasExposed()){
+                Log.e("Was exposed", "Was exposed");
+                updateUserStatus(UserStatus.exposed);
+            }
+            else{
+                Log.e("Was not exposed", "Was not exposed");
+                updateUserStatus(UserStatus.safe);
+            }
         }
 
         broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -242,15 +254,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUserStatus(UserStatus status){
+        Log.e("updateUserStatus", "updatedUser " + status);
         switch (status){
             case safe:
-                setExposedStatus();
+                setSafeStatus();
                 break;
             case outdated:
                 setOutdatedStatus();
                 break;
             case exposed:
                 setExposedStatus();
+                break;
         }
     }
 

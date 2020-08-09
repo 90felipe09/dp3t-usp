@@ -36,10 +36,13 @@ public class InfectedHashesService implements DBServiceInterface<InfectedHashesD
         InfectedHashesData data;
         while(dataList.iterator().hasNext()){
             data = dataList.iterator().next();
-            values.put(InfectedHashesContract.COLUMN_INFECTED_HASH, data.getField(InfectedHashesContract.COLUMN_INFECTED_HASH).toString());
-            values.put(InfectedHashesContract.COLUMN_DATE, data.getField(InfectedHashesContract.COLUMN_DATE).toString());
+            if(!isInDb(data.getField(InfectedHashesContract.COLUMN_INFECTED_HASH))){
+                values.put(InfectedHashesContract.COLUMN_INFECTED_HASH, data.getField(InfectedHashesContract.COLUMN_INFECTED_HASH).toString());
+                values.put(InfectedHashesContract.COLUMN_DATE, data.getField(InfectedHashesContract.COLUMN_DATE).toString());
 
-            infectedHashesDB.insert(InfectedHashesContract.TABLE_NAME, null, values);
+                infectedHashesDB.insert(InfectedHashesContract.TABLE_NAME, null, values);
+            }
+
         }
     }
 
