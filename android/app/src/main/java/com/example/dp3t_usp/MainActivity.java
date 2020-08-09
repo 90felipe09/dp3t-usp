@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -144,16 +145,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.apiService = new FirebaseAPIService();
-
-        initializeView();
-
-        updateUserStatus(UserStatus.outdated);
-
-        checkPortability();
-
         infectedHashesService = new InfectedHashesService(this);
         checkupService = new CheckupService(this);
         emittedHashesService = new EmittedHashesService(this);
+        lastCheckService = new LastCheckService(this);
+
+        initializeView();
+
+        //updateUserStatus(UserStatus.outdated);
+
+        checkPortability();
+
+
     }
 
 
@@ -188,6 +191,17 @@ public class MainActivity extends AppCompatActivity {
         if(!SyncedService.checkSync(this)){
             updateUserStatus(UserStatus.outdated);
             apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
+        }
+        else{
+            Log.e("Is already Synced", "Is synced");
+            if(checkupService.wasExposed()){
+                Log.e("Was exposed", "Was exposed");
+                updateUserStatus(UserStatus.exposed);
+            }
+            else{
+                Log.e("Was not exposed", "Was not exposed");
+                updateUserStatus(UserStatus.safe);
+            }
         }
 
         broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -240,26 +254,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUserStatus(UserStatus status){
+        Log.e("updateUserStatus", "updatedUser " + status);
         switch (status){
             case safe:
                 setSafeStatus();
+                break;
             case outdated:
                 setOutdatedStatus();
+                break;
             case exposed:
                 setExposedStatus();
+                break;
         }
     }
 
     private void setSafeStatus() {
-        //todo fe
         status = UserStatus.safe;
+        statusLabel.setText("Você está seguro");
+        statusImage.setImageResource(R.drawable.ic_baseline_check_circle_24);
+        statusImage.setColorFilter(Color.GREEN);
     }
     private void setOutdatedStatus() {
-        //todo fe
         status = UserStatus.outdated;
+        statusLabel.setText("Dados desatualizados");
+        statusImage.setImageResource(R.drawable.ic_baseline_sync_problem_24);
+        statusImage.setColorFilter(Color.BLUE);
     }
     private void setExposedStatus(){
-        //todo fe
         status = UserStatus.exposed;
+        statusLabel.setText("Você foi exposto!");
+        statusImage.setImageResource(R.drawable.ic_baseline_warning_24);
+        statusImage.setColorFilter(Color.RED);
     }
 }

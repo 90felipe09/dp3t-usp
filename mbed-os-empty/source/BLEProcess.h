@@ -17,6 +17,8 @@
 #ifndef GATT_SERVER_EXAMPLE_BLE_PROCESS_H_
 #define GATT_SERVER_EXAMPLE_BLE_PROCESS_H_
 
+#ifdef __cplusplus
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -29,6 +31,8 @@
 #include "ble/GapAdvertisingParams.h"
 #include "ble/GapAdvertisingData.h"
 #include "ble/FunctionPointerWithContext.h"
+
+
 
 //DigitalOut led1(P1_13);
 /**

@@ -48,8 +48,8 @@ public class ListenedHashesService implements DBServiceInterface<ListenedHashesD
         cursor.moveToFirst();
         int hashColumn = cursor.getColumnIndex(ListenedHashesContract.COLUMN_LISTENED_HASH);
         int dateColumn = cursor.getColumnIndex(ListenedHashesContract.COLUMN_DATE);
-        Log.e("dbListenedHashesContent", "Entries number" + cursor.getCount());
-        while(!cursor.isAfterLast()){
+        Log.e("dbListenedHashesContent", "Entries number " + cursor.getCount());
+        while(!cursor.isAfterLast() &&  cursor.getCount() != 0){
             Log.e("dbListenedHashesContent", "Entry " + cursor.getPosition() + ": " + cursor.getString(hashColumn) + " from " + cursor.getString(dateColumn));
             listenedHashesData.add(new ListenedHashesData(cursor.getString(hashColumn), cursor.getString(dateColumn)));
             cursor.moveToNext();

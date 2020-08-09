@@ -1,24 +1,21 @@
 /***GENERAL INCLUDES***/
-
+//appUUID: 03d95df9-63c9-494d-a8b0-d86f2bdc06c3
+//parcel: 03d95df9-63c9-494d-a8b0-d86f2bdc06c3
 //MBed Includes
 
 #include <events/mbed_events.h>
 
 #include "mbed.h"
 /***Definições do Arquétipo***/
-
-int comm=1; // Selecionar: 0 para nenhum, 1 para BLE, 2 para Lorawan ou 3 para Lora
 int sensors=0;
 
 // Comm parece ser a variável que designa o modo de comunicação a se utilizar, nenhum, Bluetooth Low Energy, Low Radio Wan, Low Radio
 
 /***Global Variables***/
 
-float  sensor_get_0 = 0;
-float  sensor_get_1 = 0;
-float  sensor_get_2 = 0;
-float  sensor_get_3 = 0;
-float  sensor_get_4 = 0;
+float  temperatureRawMeasure = 0;
+float  pressureRawMeasure = 0;
+float  humidityRawMeasure = 0;
 
 uint32_t sens00 = 0;
 uint32_t sens01 = 0;
@@ -38,10 +35,12 @@ int read_sens=0;
 #include "ble/BLE.h"
 #include "ble/Gap.h"
 #include "ble/GattClient.h"
-#include "ble/GapAdvertisingParams.h"
-#include "ble/GapAdvertisingData.h"
+//#include "ble/GapAdvertisingParams.h"
+//#include "ble/GapAdvertisingData.h"
 #include "ble/GattServer.h"
 #include "BLEProcess.h"
+
+#include <Gap.h>
 
 // P1_13 e similes são constantes de definição de pinagens.
 DigitalOut led1(P1_13);
@@ -52,72 +51,26 @@ AnalogIn painel (P0_28);
 //Sensors Includes
 
 #include "BME280.h" // temperatura, humidade e pressão
-#include "Si1133.h" //uv, iluminação
-#include "BMX160.txt" 
-
-
 
 /***DEFINES***/
 
 //Sensors and Peripherals
 
 BME280 sensor_amb(P0_13, P0_15, 0x77 << 1); 
-Si1133 sensor_light(P0_13, P0_15);
 
 /***Functions***/
 
-void Sensor_Read(int sens){
-       
-         if (sens==1) {
-             sensor_amb.initialize();
-             sensor_get_0 =  sensor_amb.getTemperature();  
-             printf("Temp = %f\n", sensor_get_0);             
+void Read_THP(){
+    sensor_amb.initialize();
+    temperatureRawMeasure =  sensor_amb.getTemperature();  
+    printf("Temp = %f\n", temperatureRawMeasure);             
 
-              
-             sensor_get_1 =  sensor_amb.getPressure();
-             printf("Pres = %f\n", sensor_get_1);              
-            
-             
-             sensor_get_2 =  sensor_amb.getHumidity();
-             printf("Hum = %f\n", sensor_get_2);              
-             
-             sensor_amb.sleep();
-             
-             }
-             
-        if (sens==2) {
-            if(sensor_light.open()){
-                sensor_get_3 =  sensor_light.get_light_level();
-                printf("Light Level = %f\n", sensor_get_3);             
-            }
-        }
-            
-        if (sens==3) {
-            if(sensor_light.open()){              
-                sensor_get_4 =  sensor_light.get_uv_index();
-                printf("Uv Index = %f\n", sensor_get_4);
-                }              
-            } 
-            
-        if (sens==4) {
-            
-            BMX160_read_acc();
-            
-            }
+    pressureRawMeasure =  sensor_amb.getPressure();
+    printf("Pres = %f\n", pressureRawMeasure);              
 
-        if (sens==5) {
-            
-            BMX160_read_gyr();
-            
-            }
-        
-        if (sens==6) {
-            
-            BMX160_read_mag();
-            
-            }
-
-    }
+    humidityRawMeasure =  sensor_amb.getHumidity();
+    printf("Hum = %f\n", humidityRawMeasure);              
+}
 
 void blink_led (void){
     for(int i=0; i<10; i++){
@@ -244,36 +197,76 @@ void read_IoT_sensors (void){
     }
 #include "BLE.txt"
 
-int Communication(int comm){
-       
-        if(comm==0){
-            while (1){
-                //Sensor_Read(sensors);
-                Sensor_Read(4);
-                Sensor_Read(5);
-                Sensor_Read(6);
-                }
-            }     
-
-        if(comm==1){
-            
-            BLE &ble_interface = BLE::Instance();
-            events::EventQueue event_queue;
-            MyService demo_service;
-            BLEProcess ble_process(event_queue, ble_interface);     
-            ble_process.on_init(callback(&demo_service, &MyService::start));
-            ble_process.start();
-            event_queue.dispatch_forever();           
-            }
-
-        return 0;
+void scanCallback(const Gap::AdvertisementCallbackParams_t *params){
+#if DUMP_ADV_DATA
+    for(unsigned index = 0; index < params-> advertisingDataLen; index++){
+        printf("%02x ", params->advertisingData[index]);
+        read_IoT_sensors();
+    }
+#endif
 }
 
-int main() {
+void BleScannerConfig(){ 
+    BLE &ble_interface = BLE::Instance();
+    ble::Gap& gap = ble_interface.gap();
     
-    BMX160_config();
+    // phy_t: Tipo de configuração para camada física em OSI;
+    //  LE_1M significa que a taxa de transferência seria de 1Mbit/s
+    //  Usa-se a taxa de 2Mbit/s com LE_2M para ter transferências mais rápidas
+    //  e e minimizar o tempo de comunicação, o que leva a uma maior economia de bateria.
+    //  Algo importante em IoT. O preço: Menor sensibilidade. No entanto é um preço aceitável,
+    //  uma vez que se estará em ambiente público recebendo a todo momento novos dados.
+    ble::phy_t phy = ble::phy_t::LE_2M;
+
+    // window e interval são todos do tipo Duration, por isso possuem os mesmo métodos
+    // scan_window_t: Determina o duty cycle que se escutará um pacote;
+    //  ao usar o min, especificamos que queremos 200ms do período ouvindo.
+    BLE::scan_window_t scanWindowDuration = ble::scan_window_t::min();
+
+    //  scan_interval_t: Determina o intervalo de duração de um ciclo.
+    //      Como tanto o intervalo como a janela estão em 200ms, teremos 100% de duty cycle.
+    BLE::scan_interval_t scanIntervalDuration = ble::scan_interval_t::min();
+
+    //  O Scan ativo responde a todo pacote que recebe. Não será necessário, por isso usaremos o passivo.
+    //      Isto irá nos poupar bateria.
+    bool activeScanning = false;
+
+    //  Este elemento é passivo. Por isso o seu endereço não será lido em nenhum momneto.
+    //      Podemos configurá-lo como aleatório.
+    ble::own_address_type_t ownAddressType = ble::own_address_type_t::RANDOM;
+
+    // Só leremos pacotes com o uuid especificado.
+    ble::scanning_filter_policy_t scanningFilterPolicy = ble::scanning_filter_policy_t::FILTER_ADVERTISING;
+
+    ble::ScanParameters params = new ble::ScanParameters(
+        phy, 
+        scanWindowDuration, 
+        scanIntervalDuration, 
+        activeScanning, 
+        ownAddressType, 
+        scanningFilterPolicy);
+
+    gap.setScanParameters(param);
+    // versão mais simples:
+    // ble.init();
+    // ble.setScanParams(500,200);
+
+    ble::whitelist_t whitelist;
+    entry_t *entries = {"03d95df9-63c9-494d-a8b0-d86f2bdc06c3"}
+    whitelist::addresses = ble::whitelist_t::entry_t();
+    gap.setWhiteList(entries);
+    gap.startScan(scanCallback);
+    while(true){
+        ble.waitForEvent();
+    }
+}
+
+
+
+int main() {
     config_adc();
 
-    Communication (comm);   
+    BleScannerConfig ();   
+
     
-    }
+}

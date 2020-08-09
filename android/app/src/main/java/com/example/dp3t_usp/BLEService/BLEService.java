@@ -11,6 +11,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.dp3t_usp.HashGenerator;
 import com.example.dp3t_usp.MainActivity;
 import com.example.dp3t_usp.R;
 
@@ -24,13 +25,15 @@ public class BLEService extends Service {
     private BLEScannerHandler scanner;
     private ParcelUuid pUuid;
 
+    private HashGenerator hashgenerator = new HashGenerator();
+    private String hash = hashgenerator.Generate();
     private int currentHash = 0;
 
     private Handler handler;
     private Runnable runnable;
 
 
-//    private static int TIME_BETWEEN_HASH_CHANGES = 1000; for tests
+//    private static int TIME_BETWEEN_HASH_CHANGES = 1000; //for tests
     private static int TIME_BETWEEN_HASH_CHANGES = 1000 * 60 * 5;
 
     public BLEService() {
@@ -62,11 +65,13 @@ public class BLEService extends Service {
         this.runnable = new Runnable() {
             @Override
             public void run() {
-                currentHash = currentHash + 1;
-                String hashedString = String.valueOf(currentHash);
-                advertiser.configData(hashedString, pUuid);
-                scanner.setPreventOwnHash(hashedString);
-                Log.e("Hash change", "Changed to " + hashedString);
+                // currentHash = currentHash + 1;
+                hash = hashgenerator.Generate();
+                // String hashedString = String.valueOf(currentHash);
+                Log.e("PARCELUUID", pUuid.toString());
+                advertiser.configData(hash, pUuid);
+                scanner.setPreventOwnHash(hash);
+                Log.e("Hash change", "Changed to " + hash);
                 handler.postDelayed(runnable, TIME_BETWEEN_HASH_CHANGES);
             }
         };

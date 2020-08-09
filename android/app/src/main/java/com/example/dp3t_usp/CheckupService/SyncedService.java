@@ -20,13 +20,15 @@ public class SyncedService {
         lastCheckService = new LastCheckService(context);
         ArrayList<LastCheckData> lastCheckData = lastCheckService.getData();
         Date actualTime = Calendar.getInstance().getTime();
-        Date lastTime = DateService.parseString(lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE));
+
 
         Log.e("actualTime", actualTime.toString());
 
         if(lastCheckData == null){
             return false;
         }
+
+        Date lastTime = DateService.parseString(lastCheckData.get(0).getField(LastCheckContract.COLUMN_DATE));
 
         if (actualTime.after(lastTime)){
             return false;

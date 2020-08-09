@@ -23,7 +23,7 @@ public class LastCheckService implements DBServiceInterface<LastCheckData> {
     public void insertData(LastCheckData dbData) {
         SQLiteDatabase lastCheckDB = this.lastCheckHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(LastCheckContract.COLUMN_DATE, dbData.getField(LastCheckContract.COLUMN_DATE).toString());
+        values.put(LastCheckContract.COLUMN_DATE, dbData.getField(LastCheckContract.COLUMN_DATE));
         this.deleteAllData();
         lastCheckDB.insert(LastCheckContract.TABLE_NAME, null, values);
     }
@@ -32,6 +32,7 @@ public class LastCheckService implements DBServiceInterface<LastCheckData> {
     public void insertData(ArrayList<LastCheckData> dataList) {
         return;
     }
+
 
     @Override
     public ArrayList<LastCheckData> getData() {
