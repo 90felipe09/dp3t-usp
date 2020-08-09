@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -154,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         infectedHashesService = new InfectedHashesService(this);
         checkupService = new CheckupService(this);
         emittedHashesService = new EmittedHashesService(this);
+        lastCheckService = new LastCheckService(this);
     }
 
 
@@ -242,24 +244,32 @@ public class MainActivity extends AppCompatActivity {
     private void updateUserStatus(UserStatus status){
         switch (status){
             case safe:
-                setSafeStatus();
+                setExposedStatus();
+                break;
             case outdated:
                 setOutdatedStatus();
+                break;
             case exposed:
                 setExposedStatus();
         }
     }
 
     private void setSafeStatus() {
-        //todo fe
         status = UserStatus.safe;
+        statusLabel.setText("Você está seguro");
+        statusImage.setImageResource(R.drawable.ic_baseline_check_circle_24);
+        statusImage.setColorFilter(Color.GREEN);
     }
     private void setOutdatedStatus() {
-        //todo fe
         status = UserStatus.outdated;
+        statusLabel.setText("Dados desatualizados");
+        statusImage.setImageResource(R.drawable.ic_baseline_sync_problem_24);
+        statusImage.setColorFilter(Color.BLUE);
     }
     private void setExposedStatus(){
-        //todo fe
         status = UserStatus.exposed;
+        statusLabel.setText("Você foi exposto!");
+        statusImage.setImageResource(R.drawable.ic_baseline_warning_24);
+        statusImage.setColorFilter(Color.RED);
     }
 }
