@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+    service:
+        build: .
+        ports:
+            - "8008:8008"
+    postgres:
+        image: postgres:10.5
+        restart: always
+        environment:
+          - POSTGRES_USER=dp3t
+          - POSTGRES_PASSWORD=dp3t3team
+        logging:
+          options:
+            max-size: 10m
+            max-file: "3"
+        ports:
+          - '5555:5432'
+        volumes: 
+          - ./postgres-data:/var/lib/postgresql/data
+          # copy the sql script to create tables
+          - ./sql/01-HashesUnderAnalysis.sql:/docker-entrypoint-initdb.d/01-HashesUnderAnalysis.sql
+          - ./sql/02-InfectedHashes.sql:/docker-entrypoint-initdb.d/02-InfectedHashes.sql
+          - ./sql/03-PublicListenedExposure.sql:/docker-entrypoint-initdb.d/03-PublicListenedExposure.sql
+          - ./sql/04-PublicInfectedExposure.sql:/docker-entrypoint-initdb.d/04-PublicInfectedExposure.sql
