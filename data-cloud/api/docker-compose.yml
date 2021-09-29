@@ -1,10 +1,10 @@
 version: '3.7'
 services:
-    service:
+    cloud-api-dp3t:
         build: .
         ports:
             - "8008:8008"
-    postgres:
+    cloud-db-dp3t:
         image: postgres:10.5
         restart: always
         environment:

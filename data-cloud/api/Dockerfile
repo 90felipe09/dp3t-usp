@@ -13,9 +13,9 @@ RUN npm install
 # RUN npm ci --only=production
 
 # Bundle app source
-COPY ./build .
+COPY ./src .
 
 COPY ./.env .
 
 EXPOSE 8008
-CMD [ "node", "index.js" ]
+CMD [ "npm", "run" , "start:dev"]

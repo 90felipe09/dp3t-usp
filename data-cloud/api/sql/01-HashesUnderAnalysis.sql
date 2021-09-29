@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS HashesUnderAnalysis (
-    aggregator       INT PRIMARY KEY generated always as identity,
-    exposure_hash    VARCHAR(32),
+CREATE TABLE IF NOT EXISTS hashes_under_analysis (
+    aggregator       VARCHAR(36),
+    exposure_hash    VARCHAR(32) PRIMARY KEY,
     "date"           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
