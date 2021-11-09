@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dp3t_usp.APIService.APIService;
-import com.example.dp3t_usp.APIService.FirebaseAPIService;
+import com.example.dp3t_usp.APIService.RemoteAPIService;
 import com.example.dp3t_usp.BLEService.BLEService;
 import com.example.dp3t_usp.CheckupService.CheckupService;
 import com.example.dp3t_usp.CheckupService.SyncedService;
@@ -32,10 +32,9 @@ import com.example.dp3t_usp.DBService.DBInfectedHashes.InfectedHashesService;
 import com.example.dp3t_usp.DBService.DBLastCheck.LastCheckData;
 import com.example.dp3t_usp.DBService.DBLastCheck.LastCheckService;
 import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesData;
+import com.example.dp3t_usp.DBService.DBListenedHashes.ListenedHashesService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import android.view.View;
 
 
@@ -67,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     LastCheckService lastCheckService;
     CheckupService checkupService;
     EmittedHashesService emittedHashesService;
+    ListenedHashesService listenedHashesService;
 
     class onGetHashesSuccessCallbackImpl implements APIService.onGetHashesSuccessCallback {
         @Override
@@ -111,6 +111,22 @@ public class MainActivity extends AppCompatActivity {
             Log.e("Log Infected Hashes DB", iterator.next().values.toString());
         }
         Log.e("Log Infected Hashes DB", "========END DEBUG=======");
+
+        Log.e("Log Emitted Hashes DB", "========STARTING DEBUG=======");
+        ArrayList<EmittedHashesData> emmitedHashes = emittedHashesService.getData();
+        Iterator<EmittedHashesData> iteratorEmitted = emmitedHashes.iterator();
+        while(iteratorEmitted.hasNext()){
+            Log.e("Log Emitted Hashes DB", iteratorEmitted.next().values.toString());
+        }
+        Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
+
+        Log.e("Log Listened Hashes DB", "========STARTING DEBUG=======");
+        ArrayList<ListenedHashesData> listenedHashes = listenedHashesService.getData();
+        Iterator<ListenedHashesData> iteratorListened = listenedHashes.iterator();
+        while(iteratorListened.hasNext()){
+            Log.e("Log Listened Hashes DB", iteratorListened.next().values.toString());
+        }
+        Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
     }
 
     class onPostHashesSuccessCallbackImpl implements APIService.onPostHashesSuccessCallback {
@@ -147,15 +163,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.apiService = new FirebaseAPIService();
+        String remoteURL = getString(R.string.cloud_url);
+        this.apiService = new RemoteAPIService(remoteURL, this);
         infectedHashesService = new InfectedHashesService(this);
         checkupService = new CheckupService(this);
         emittedHashesService = new EmittedHashesService(this);
         lastCheckService = new LastCheckService(this);
+        listenedHashesService = new ListenedHashesService(this);
 
         initializeView();
-
-        //updateUserStatus(UserStatus.outdated);
 
         checkPortability();
 
@@ -192,8 +208,11 @@ public class MainActivity extends AppCompatActivity {
         statusLabel = findViewById(R.id.label_exposition_status);
         exposedRecommendation = findViewById(R.id.exposed_recomendation);
 
+        debugDB();
+
         if(!SyncedService.checkSync(this)){
             updateUserStatus(UserStatus.outdated);
+            Log.i("initializeView()", "Is calling getInfectedHashes");
             apiService.getInfectedHashes(new onGetHashesSuccessCallbackImpl());
         }
         else{
@@ -217,7 +236,6 @@ public class MainActivity extends AppCompatActivity {
 
         shareWithFogButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO IMPL : add share with fog function, and update Status
                 ArrayList<EmittedHashesData> emittedHashes = emittedHashesService.getData();
                 Iterator<EmittedHashesData> iterator = emittedHashes.iterator();
                 ArrayList<String> hashesToSend = new ArrayList<>();

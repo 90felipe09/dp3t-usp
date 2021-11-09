@@ -79,17 +79,24 @@ public class BLEAdvertiserHandler{
 
     
     public void configData(String dataToSend, ParcelUuid pUuid){
-        this.data = new AdvertiseData.Builder()
-                        .setIncludeDeviceName(false)
-                        .addServiceData(pUuid, dataToSend.getBytes(Charset.forName("UTF-8")))
-                        .build();
-        EmittedHashesData emittedHash = new EmittedHashesData(dataToSend, Calendar.getInstance().getTime().toString());
-        Log.e("BLEAdvert:emittedHash:", emittedHash.values.toString());
-        this.emittedHashesService.insertData(emittedHash);
-        debugDB();
-        stopAdvertising();
-        startAdvertising();
-
+        Log.e("Hash being emmited:", dataToSend);
+        Log.e("Hash size:", Integer.toString(dataToSend.length()));
+        if (dataToSend.length() > 4) {
+            String transformedData = dataToSend.substring(0, 8);
+            this.data = new AdvertiseData.Builder()
+                    .addServiceUuid(pUuid)
+                    .setIncludeDeviceName(false)
+                    .addManufacturerData(0, transformedData.getBytes(Charset.forName("UTF-8")))
+                    .build();
+            Log.e("Packet data: ", this.data.toString());
+            Log.e("Packet size: ", Integer.toString(this.data.getServiceData().size()));
+            EmittedHashesData emittedHash = new EmittedHashesData(transformedData, Calendar.getInstance().getTime().toString());
+            Log.e("BLEAdvert:emittedHash:", emittedHash.values.toString());
+            this.emittedHashesService.insertData(emittedHash);
+            debugDB();
+            stopAdvertising();
+            startAdvertising();
+        }
     }
 
     void debugDB(){

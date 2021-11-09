@@ -7,6 +7,7 @@ import { HashesUnderAnalysis } from "../models/HashesUnderAnalysis"
 export class CollectHandler {
     public static handleCollect = async (req: Request, res: Response) => {
         const collectArgs: CollectArguments = req.body;
+        console.log(`[INFO] Endpoint: /collect || Collecting hashes. Amount: ${collectArgs.hashes.length}`)
         const randomAggregator = uuidv4();
         collectArgs.hashes.forEach(async (hash) => {
             const newHashUnderAnalysis = new HashesUnderAnalysis();

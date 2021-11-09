@@ -15,6 +15,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts", "src/index.ts.bkp"],
+  "include": ["src/**/*.ts", "src/index.ts.bkp", "app.ts"],
   "exclude": ["node_modues"]
 }
