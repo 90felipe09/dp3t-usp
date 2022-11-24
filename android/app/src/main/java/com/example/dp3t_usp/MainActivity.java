@@ -103,32 +103,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void debugDB(){
-        Log.e("Log Infected Hashes DB", "========STARTING DEBUG=======");
-        ArrayList<InfectedHashesData> storedHashes = infectedHashesService.getData();
-        Iterator<InfectedHashesData> iterator = storedHashes.iterator();
-        while(iterator.hasNext()){
-            Log.e("Log Infected Hashes DB", iterator.next().values.toString());
-        }
-        Log.e("Log Infected Hashes DB", "========END DEBUG=======");
-
-        Log.e("Log Emitted Hashes DB", "========STARTING DEBUG=======");
-        ArrayList<EmittedHashesData> emmitedHashes = emittedHashesService.getData();
-        Iterator<EmittedHashesData> iteratorEmitted = emmitedHashes.iterator();
-        while(iteratorEmitted.hasNext()){
-            Log.e("Log Emitted Hashes DB", iteratorEmitted.next().values.toString());
-        }
-        Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
-
-        Log.e("Log Listened Hashes DB", "========STARTING DEBUG=======");
-        ArrayList<ListenedHashesData> listenedHashes = listenedHashesService.getData();
-        Iterator<ListenedHashesData> iteratorListened = listenedHashes.iterator();
-        while(iteratorListened.hasNext()){
-            Log.e("Log Listened Hashes DB", iteratorListened.next().values.toString());
-        }
-        Log.e("Log Emitted Hashes DB", "========END DEBUG=======");
-    }
-
     class onPostHashesSuccessCallbackImpl implements APIService.onPostHashesSuccessCallback {
         @Override
         public void callback() {
