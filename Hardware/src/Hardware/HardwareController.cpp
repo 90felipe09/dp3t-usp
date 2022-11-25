@@ -18,7 +18,9 @@ HardwareController* HardwareController::getInstance()
 
 void IRAM_ATTR HardwareController::goToSleep()
 {
-    esp_sleep_enable_timer_wakeup(HOURS_TO_SLEEP * S_TO_HOUR_FACTOR * uS_TO_S_FACTOR);
+    uint64_t timeBetweenCycles = uS_TO_mS_FACTOR * mS_TO_S_FACTOR;
+    timeBetweenCycles *= HOURS_TO_SLEEP * S_TO_HOUR_FACTOR;
+    esp_sleep_enable_timer_wakeup(timeBetweenCycles);
     Serial.println("Entrando em Deep Sleep");
     esp_deep_sleep_start();
 }
@@ -28,8 +30,10 @@ void HardwareController::initOperationTimer()
     timer = timerBegin(0, 80, true);
     timerWrite(timer, 0);
 
-    timerAttachInterrupt(timer, &goToSleep, true);
-    timerAlarmWrite(timer, HOURS_TO_SLEEP * S_TO_HOUR_FACTOR * uS_TO_S_FACTOR, true);
+    timerAttachInterrupt(timer, &HardwareController::goToSleep, true);
+    uint64_t timeBetweenCycles = uS_TO_mS_FACTOR * mS_TO_S_FACTOR;
+    timeBetweenCycles *= HOURS_TO_SLEEP * S_TO_HOUR_FACTOR;
+    timerAlarmWrite(timer, timeBetweenCycles, true);
     timerAlarmEnable(timer);
 }
 

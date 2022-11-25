@@ -1,7 +1,5 @@
 #include "Bluetooth/BluetoothScanner.h"
 #include "Hardware/HardwareController.h"
-#include "Wifi/WifiController.h"
-#include "Sensor/DHTController.h"
 
 BluetoothScanner* scanner;
 // setup()
@@ -12,6 +10,7 @@ void setup()
 {
   scanner = BluetoothScanner::getInstance();
   scanner->startScanning();
+  HardwareController::getInstance();
 }
 
 // loop()
@@ -19,5 +18,4 @@ void setup()
 //  environment for BLE packets every 0.5 seconds.
 void loop()
 {
-  stateManager->stateLoop();
 }

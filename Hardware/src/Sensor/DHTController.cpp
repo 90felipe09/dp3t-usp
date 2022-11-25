@@ -4,7 +4,7 @@ DHTController* DHTController::instance = nullptr;
 
 DHTController::DHTController()
 {
-    dht = new DHT(DHTPIN, DHTTYPE);
+    dhtSensor = new DHT(DHTPIN, DHTTYPE);
 }
 
 DHTController* DHTController::getInstance()
@@ -16,10 +16,10 @@ DHTController* DHTController::getInstance()
 
 float DHTController::getHumidity()
 {
-    return dht.readHumidity();
+    return dhtSensor->readHumidity();
 }
 
 float DHTController::getTemperature()
 {
-    return dht.readTemperature();
+    return dhtSensor->readTemperature();
 }

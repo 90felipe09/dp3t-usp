@@ -1,6 +1,7 @@
 #ifndef DHT_CONTROLLER_H
 #define DHT_CONTROLLER_H
 
+#include <Adafruit_Sensor.h>
 #include "DHT.h"
 
 #define DHTPIN 4
@@ -14,7 +15,7 @@ class DHTController
 private:
     static DHTController* instance;
 
-    DHT dhtSensor;
+    DHT* dhtSensor;
 
 public:
     DHTController();

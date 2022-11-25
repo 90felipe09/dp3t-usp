@@ -1,6 +1,6 @@
 #include "WifiController.h"
 
-WifiController WifiController::instance = nullptr;
+WifiController* WifiController::instance = nullptr;
 
 void WifiController::initWifiConnection()
 {
@@ -23,8 +23,9 @@ void WifiController::initWifiConnection()
 
 const char* WifiController::mountDataPacket(String hash, float t, float h)
 {
+    String nodeLocation = NODE_LOCATION;
     String hashJsonPart = "{\"hash\": \"" + hash + "\",";
-    String locJsonPart = "\"location_identifier\": \"" + NODE_LOCATION + "\",";
+    String locJsonPart = "\"location_identifier\": \"" + nodeLocation + "\",";
     String tempJsonPart =  "\"temperature\": " + String(t) + ",";
     String humdJsonPart = "\"humidity\": " + String(h) + "}";
     String jsonString = hashJsonPart + locJsonPart + tempJsonPart + humdJsonPart;
@@ -33,7 +34,7 @@ const char* WifiController::mountDataPacket(String hash, float t, float h)
     return httpRequestData;
 }
 
-void WifiController::WifiController()
+WifiController::WifiController()
 {
     initWifiConnection();
 }
