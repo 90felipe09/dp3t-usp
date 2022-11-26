@@ -5,6 +5,7 @@ DHTController* DHTController::instance = nullptr;
 DHTController::DHTController()
 {
     dhtSensor = new DHT(DHTPIN, DHTTYPE);
+    dhtSensor->begin();
 }
 
 DHTController* DHTController::getInstance()

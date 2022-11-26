@@ -25,7 +25,7 @@ private:
     //  If finds a BLE packet, reacts by calling MyAdvertisedDeviceCallbacks
     //  activity.
     void initWifiConnection();
-    const char* mountDataPacket(String hash, float t, float h);
+    String mountDataPacket(String hash, float t, float h);
 
 public:
     WifiController();

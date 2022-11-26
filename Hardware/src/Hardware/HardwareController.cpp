@@ -41,6 +41,8 @@ void HardwareController::activateCapture(String hash)
 {
     float temperature = dht->getTemperature();
     float humidity = dht->getHumidity();
+    if(isnan(temperature) || isnan(humidity))
+        return;
 
     wifi->sendData(hash, temperature, humidity);
 }

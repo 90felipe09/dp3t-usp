@@ -21,7 +21,7 @@ void WifiController::initWifiConnection()
     http.addHeader("Content-Type", "application/json");
 }
 
-const char* WifiController::mountDataPacket(String hash, float t, float h)
+String WifiController::mountDataPacket(String hash, float t, float h)
 {
     String nodeLocation = NODE_LOCATION;
     String hashJsonPart = "{\"hash\": \"" + hash + "\",";
@@ -30,8 +30,7 @@ const char* WifiController::mountDataPacket(String hash, float t, float h)
     String humdJsonPart = "\"humidity\": " + String(h) + "}";
     String jsonString = hashJsonPart + locJsonPart + tempJsonPart + humdJsonPart;
 
-    const char* httpRequestData = jsonString.c_str();
-    return httpRequestData;
+    return jsonString;
 }
 
 WifiController::WifiController()
@@ -48,6 +47,6 @@ WifiController* WifiController::getInstance()
 
 void WifiController::sendData(String hash, float temperature, float humidity)
 {
-    const char* httpRequestData = mountDataPacket(hash, temperature, humidity);
+    String httpRequestData = mountDataPacket(hash, temperature, humidity);
     int httpResponseCode = http.POST(httpRequestData);
 }
